@@ -19,28 +19,25 @@
 
 package org.apache.skywalking.apm.agent.core.boot;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.List;
-
+import org.apache.skywalking.apm.agent.core.context.ContextManager;
+import org.apache.skywalking.apm.agent.core.context.IgnoredTracerContext;
 import org.apache.skywalking.apm.agent.core.context.TracingContext;
+import org.apache.skywalking.apm.agent.core.context.TracingContextListener;
+import org.apache.skywalking.apm.agent.core.jvm.JVMService;
+import org.apache.skywalking.apm.agent.core.remote.CollectorDiscoveryService;
+import org.apache.skywalking.apm.agent.core.remote.TraceSegmentServiceClient;
+import org.apache.skywalking.apm.agent.core.sampling.SamplingService;
 import org.apache.skywalking.apm.agent.core.test.tools.AgentServiceRule;
 import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.Test;
-import org.apache.skywalking.apm.agent.core.context.ContextManager;
-import org.apache.skywalking.apm.agent.core.context.IgnoredTracerContext;
-import org.apache.skywalking.apm.agent.core.context.TracingContextListener;
-import org.apache.skywalking.apm.agent.core.jvm.JVMService;
-import org.apache.skywalking.apm.agent.core.remote.CollectorDiscoveryService;
-import org.apache.skywalking.apm.agent.core.remote.GRPCChannelListener;
-import org.apache.skywalking.apm.agent.core.remote.GRPCChannelManager;
-import org.apache.skywalking.apm.agent.core.remote.TraceSegmentServiceClient;
-import org.apache.skywalking.apm.agent.core.sampling.SamplingService;
+
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class ServiceManagerTest {
@@ -62,7 +59,6 @@ public class ServiceManagerTest {
         assertTraceSegmentServiceClient(ServiceManager.INSTANCE.findService(TraceSegmentServiceClient.class));
         assertContextManager(ServiceManager.INSTANCE.findService(ContextManager.class));
         assertCollectorDiscoveryService(ServiceManager.INSTANCE.findService(CollectorDiscoveryService.class));
-        assertGRPCChannelManager(ServiceManager.INSTANCE.findService(GRPCChannelManager.class));
         assertSamplingService(ServiceManager.INSTANCE.findService(SamplingService.class));
         assertJVMService(ServiceManager.INSTANCE.findService(JVMService.class));
 
@@ -89,12 +85,7 @@ public class ServiceManagerTest {
         assertNotNull(service);
     }
 
-    private void assertGRPCChannelManager(GRPCChannelManager service) throws Exception {
-        assertNotNull(service);
 
-        List<GRPCChannelListener> listeners = getFieldValue(service, "listeners");
-        assertEquals(listeners.size(), 3);
-    }
 
     private void assertSamplingService(SamplingService service) {
         assertNotNull(service);

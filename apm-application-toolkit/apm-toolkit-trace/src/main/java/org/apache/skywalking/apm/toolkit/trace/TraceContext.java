@@ -37,4 +37,10 @@ public class TraceContext {
     public static String traceId() {
         return "";
     }
+
+    public static String sessionId() {
+        return "";
+    }
+
+
 }

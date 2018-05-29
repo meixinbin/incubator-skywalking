@@ -19,6 +19,8 @@
 
 package org.apache.skywalking.apm.agent.core.os;
 
+import org.apache.skywalking.apm.agent.core.remote.model.OSInfo;
+
 import java.lang.management.ManagementFactory;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -28,7 +30,6 @@ import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.skywalking.apm.network.proto.OSInfo;
 
 /**
  * @author wusheng
@@ -96,7 +97,7 @@ public class OSUtil {
     }
 
     public static OSInfo buildOSInfo() {
-        OSInfo.Builder builder = OSInfo.newBuilder();
+        OSInfo builder = new OSInfo();
         String osName = getOsName();
         if (osName != null) {
             builder.setOsName(osName);
@@ -110,6 +111,6 @@ public class OSUtil {
             builder.addAllIpv4S(allIPV4);
         }
         builder.setProcessNo(getProcessNo());
-        return builder.build();
+        return builder;
     }
 }

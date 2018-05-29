@@ -35,7 +35,7 @@
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>
-        <fileSet>
+        <!--<fileSet>
             <directory>${project.basedir}/../apm-collector/apm-collector-boot/target/skywalking-collector-assembly/skywalking-collector/config</directory>
             <outputDirectory>/config</outputDirectory>
             <includes>
@@ -46,7 +46,7 @@
         <fileSet>
             <directory>${project.basedir}/../apm-collector/apm-collector-boot/target/skywalking-collector-assembly/skywalking-collector/libs</directory>
             <outputDirectory>/collector-libs</outputDirectory>
-        </fileSet>
+        </fileSet>-->
 
         <!-- Agent repackage into the dist -->
         <fileSet>
@@ -69,11 +69,11 @@
             <outputDirectory>/</outputDirectory>
         </fileSet>
     </fileSets>
-    <files>
+    <!--<files>
         <file>
             <source>${project.basedir}/../apm-webapp/target/skywalking-webapp.jar</source>
             <outputDirectory>/webapp</outputDirectory>
             <fileMode>0644</fileMode>
         </file>
-    </files>
+    </files>-->
 </assembly>

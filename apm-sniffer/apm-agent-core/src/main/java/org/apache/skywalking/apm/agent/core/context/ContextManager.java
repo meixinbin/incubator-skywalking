@@ -43,7 +43,7 @@ public class ContextManager implements TracingContextListener, BootService, Igno
     private static final ILog logger = LogManager.getLogger(ContextManager.class);
     private static ThreadLocal<AbstractTracerContext> CONTEXT = new ThreadLocal<AbstractTracerContext>();
     private static ContextManagerExtendService EXTEND_SERVICE;
-
+    private static volatile String SESSIONID="N/A";
     private static AbstractTracerContext getOrCreate(String operationName, boolean forceSampling) {
         AbstractTracerContext context = CONTEXT.get();
         if (EXTEND_SERVICE == null) {
@@ -56,9 +56,10 @@ public class ContextManager implements TracingContextListener, BootService, Igno
                 }
                 context = new IgnoredTracerContext();
             } else {
-                if (RemoteDownstreamConfig.Agent.APPLICATION_ID != DictionaryUtil.nullValue()
-                    && RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID != DictionaryUtil.nullValue()
-                    ) {
+                //TODO
+                boolean ignor = RemoteDownstreamConfig.Agent.APPLICATION_ID != DictionaryUtil.nullValue()
+                        && RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID != DictionaryUtil.nullValue();
+                if (true) {
                     context = EXTEND_SERVICE.createTraceContext(operationName, forceSampling);
                 } else {
                     /**
@@ -88,6 +89,12 @@ public class ContextManager implements TracingContextListener, BootService, Igno
         }
     }
 
+    public static String getSessionId(){
+    	return SESSIONID;
+	}
+	public static void setSessionId(String sessionId){
+		SESSIONID = sessionId;
+	}
     public static AbstractSpan createEntrySpan(String operationName, ContextCarrier carrier) {
         SamplingService samplingService = ServiceManager.INSTANCE.findService(SamplingService.class);
         AbstractSpan span;

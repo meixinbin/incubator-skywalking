@@ -19,7 +19,8 @@
 
 package org.apache.skywalking.apm.agent.core.context.ids;
 
-import org.apache.skywalking.apm.network.proto.UniqueId;
+
+import org.apache.skywalking.apm.agent.core.context.model.UniqueId;
 
 /**
  * The <code>DistributedTraceId</code> presents a distributed call chain.

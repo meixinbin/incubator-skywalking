@@ -19,10 +19,10 @@
 
 package org.apache.skywalking.apm.agent.core.jvm.cpu;
 
+import org.apache.skywalking.apm.agent.core.jvm.model.CPU;
 import org.apache.skywalking.apm.agent.core.logging.api.ILog;
 import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
 import org.apache.skywalking.apm.agent.core.os.ProcessorUtil;
-import org.apache.skywalking.apm.network.proto.CPU;
 
 /**
  * @author wusheng

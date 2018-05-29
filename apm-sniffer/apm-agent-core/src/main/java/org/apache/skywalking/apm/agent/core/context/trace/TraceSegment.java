@@ -27,8 +27,8 @@ import org.apache.skywalking.apm.agent.core.context.ids.DistributedTraceIds;
 import org.apache.skywalking.apm.agent.core.context.ids.GlobalIdGenerator;
 import org.apache.skywalking.apm.agent.core.context.ids.ID;
 import org.apache.skywalking.apm.agent.core.context.ids.NewDistributedTraceId;
-import org.apache.skywalking.apm.network.proto.TraceSegmentObject;
-import org.apache.skywalking.apm.network.proto.UpstreamSegment;
+import org.apache.skywalking.apm.agent.core.context.model.TraceSegmentObject;
+import org.apache.skywalking.apm.agent.core.context.model.UpstreamSegment;
 
 /**
  * {@link TraceSegment} is a segment or fragment of the distributed trace. See https://github.com/opentracing/specification/blob/master/specification.md#the-opentracing-data-model
@@ -159,11 +159,11 @@ public class TraceSegment {
      * @return the segment as GRPC service parameter
      */
     public UpstreamSegment transform() {
-        UpstreamSegment.Builder upstreamBuilder = UpstreamSegment.newBuilder();
+        UpstreamSegment upstreamBuilder = new UpstreamSegment();
         for (DistributedTraceId distributedTraceId : getRelatedGlobalTraces()) {
             upstreamBuilder = upstreamBuilder.addGlobalTraceIds(distributedTraceId.toUniqueId());
         }
-        TraceSegmentObject.Builder traceSegmentBuilder = TraceSegmentObject.newBuilder();
+        TraceSegmentObject traceSegmentBuilder = new TraceSegmentObject();
         /**
          * Trace Segment
          */
@@ -176,10 +176,9 @@ public class TraceSegment {
         }
         traceSegmentBuilder.setApplicationId(RemoteDownstreamConfig.Agent.APPLICATION_ID);
         traceSegmentBuilder.setApplicationInstanceId(RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID);
-        traceSegmentBuilder.setIsSizeLimited(this.isSizeLimited);
-
-        upstreamBuilder.setSegment(traceSegmentBuilder.build().toByteString());
-        return upstreamBuilder.build();
+        traceSegmentBuilder.setSizeLimited(this.isSizeLimited);
+        upstreamBuilder.setSegment(traceSegmentBuilder);
+        return upstreamBuilder;
     }
 
     @Override

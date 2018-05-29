@@ -19,7 +19,7 @@
 
 package org.apache.skywalking.apm.agent.core.context.util;
 
-import org.apache.skywalking.apm.network.proto.KeyWithStringValue;
+import org.apache.skywalking.apm.agent.core.context.model.KeyWithStringValue;
 
 /**
  * The <code>KeyValuePair</code> represents a object which contains a string key and a string value.
@@ -44,11 +44,11 @@ public class KeyValuePair {
     }
 
     public KeyWithStringValue transform() {
-        KeyWithStringValue.Builder keyValueBuilder = KeyWithStringValue.newBuilder();
+        KeyWithStringValue keyValueBuilder = new KeyWithStringValue();
         keyValueBuilder.setKey(key);
         if (value != null) {
             keyValueBuilder.setValue(value);
         }
-        return keyValueBuilder.build();
+        return keyValueBuilder;
     }
 }

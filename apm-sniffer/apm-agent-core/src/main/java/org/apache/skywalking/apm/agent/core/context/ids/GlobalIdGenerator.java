@@ -52,13 +52,13 @@ public final class GlobalIdGenerator {
      * @return an array contains three long numbers, which represents a unique id.
      */
     public static ID generate() {
-        if (RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID == DictionaryUtil.nullValue()) {
+        /*if (RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID == DictionaryUtil.nullValue()) {
             throw new IllegalStateException();
-        }
+        }*/
         IDContext context = THREAD_ID_SEQUENCE.get();
 
         return new ID(
-            RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID,
+            1,
             Thread.currentThread().getId(),
             context.nextSeq()
         );

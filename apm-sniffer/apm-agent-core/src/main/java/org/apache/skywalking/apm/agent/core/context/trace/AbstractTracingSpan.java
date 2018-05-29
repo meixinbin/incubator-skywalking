@@ -21,11 +21,12 @@ package org.apache.skywalking.apm.agent.core.context.trace;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.skywalking.apm.agent.core.context.model.SpanObject;
+import org.apache.skywalking.apm.agent.core.context.model.SpanType;
 import org.apache.skywalking.apm.agent.core.context.util.KeyValuePair;
 import org.apache.skywalking.apm.agent.core.context.util.ThrowableTransformer;
 import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
-import org.apache.skywalking.apm.network.proto.SpanObject;
-import org.apache.skywalking.apm.network.proto.SpanType;
 import org.apache.skywalking.apm.network.trace.component.Component;
 
 /**
@@ -245,8 +246,8 @@ public abstract class AbstractTracingSpan implements AbstractSpan {
         return this;
     }
 
-    public SpanObject.Builder transform() {
-        SpanObject.Builder spanBuilder = SpanObject.newBuilder();
+    public SpanObject transform() {
+        SpanObject spanBuilder = new SpanObject();
 
         spanBuilder.setSpanId(this.spanId);
         spanBuilder.setParentSpanId(parentSpanId);
@@ -274,7 +275,7 @@ public abstract class AbstractTracingSpan implements AbstractSpan {
                 spanBuilder.setComponent(componentName);
             }
         }
-        spanBuilder.setIsError(errorOccurred);
+        spanBuilder.setError(errorOccurred);
         if (this.tags != null) {
             for (KeyValuePair tag : this.tags) {
                 spanBuilder.addTags(tag.transform());

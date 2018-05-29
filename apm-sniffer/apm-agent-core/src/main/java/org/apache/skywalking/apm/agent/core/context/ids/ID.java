@@ -19,7 +19,8 @@
 
 package org.apache.skywalking.apm.agent.core.context.ids;
 
-import org.apache.skywalking.apm.network.proto.UniqueId;
+
+import org.apache.skywalking.apm.agent.core.context.model.UniqueId;
 
 /**
  * @author wusheng
@@ -97,6 +98,7 @@ public class ID {
     }
 
     public UniqueId transform() {
-        return UniqueId.newBuilder().addIdParts(part1).addIdParts(part2).addIdParts(part3).build();
+        UniqueId uniqueId = new UniqueId();
+        return uniqueId.addIdParts(part1).addIdParts(part2).addIdParts(part3);
     }
 }

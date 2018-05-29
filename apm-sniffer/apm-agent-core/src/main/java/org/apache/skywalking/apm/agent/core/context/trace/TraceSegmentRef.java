@@ -23,9 +23,10 @@ import org.apache.skywalking.apm.agent.core.conf.RemoteDownstreamConfig;
 import org.apache.skywalking.apm.agent.core.context.ContextCarrier;
 import org.apache.skywalking.apm.agent.core.context.ContextSnapshot;
 import org.apache.skywalking.apm.agent.core.context.ids.ID;
+import org.apache.skywalking.apm.agent.core.context.model.RefType;
+import org.apache.skywalking.apm.agent.core.context.model.TraceSegmentReference;
 import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
-import org.apache.skywalking.apm.network.proto.RefType;
-import org.apache.skywalking.apm.network.proto.TraceSegmentReference;
+
 
 /**
  * {@link TraceSegmentRef} is like a pointer, which ref to another {@link TraceSegment},
@@ -120,7 +121,7 @@ public class TraceSegmentRef {
     }
 
     public TraceSegmentReference transform() {
-        TraceSegmentReference.Builder refBuilder = TraceSegmentReference.newBuilder();
+        TraceSegmentReference refBuilder = new TraceSegmentReference();
         if (SegmentRefType.CROSS_PROCESS.equals(type)) {
             refBuilder.setRefType(RefType.CrossProcess);
             if (peerId == DictionaryUtil.nullValue()) {
@@ -146,7 +147,7 @@ public class TraceSegmentRef {
         } else {
             refBuilder.setParentServiceId(parentOperationId);
         }
-        return refBuilder.build();
+        return refBuilder;
     }
 
     @Override

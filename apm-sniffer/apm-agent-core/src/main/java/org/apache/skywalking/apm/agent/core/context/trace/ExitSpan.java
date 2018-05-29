@@ -19,9 +19,10 @@
 
 package org.apache.skywalking.apm.agent.core.context.trace;
 
+import org.apache.skywalking.apm.agent.core.context.model.SpanObject;
 import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
-import org.apache.skywalking.apm.network.proto.SpanObject;
 import org.apache.skywalking.apm.network.trace.component.Component;
+
 
 /**
  * The <code>ExitSpan</code> represents a service consumer point, such as Feign, Okhttp client for a Http service.
@@ -118,8 +119,8 @@ public class ExitSpan extends StackBasedTracingSpan implements WithPeerInfo {
         return this;
     }
 
-    @Override public SpanObject.Builder transform() {
-        SpanObject.Builder spanBuilder = super.transform();
+    @Override public SpanObject transform() {
+        SpanObject spanBuilder = super.transform();
         if (peerId != DictionaryUtil.nullValue()) {
             spanBuilder.setPeerId(peerId);
         } else {

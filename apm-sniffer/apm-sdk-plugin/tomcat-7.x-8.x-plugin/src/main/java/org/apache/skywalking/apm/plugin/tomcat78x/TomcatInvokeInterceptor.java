@@ -20,6 +20,8 @@
 package org.apache.skywalking.apm.plugin.tomcat78x;
 
 import java.lang.reflect.Method;
+import java.util.UUID;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.skywalking.apm.agent.core.context.CarrierItem;
@@ -33,6 +35,9 @@ import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedI
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstanceMethodsAroundInterceptor;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.MethodInterceptResult;
 import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * {@link TomcatInvokeInterceptor} fetch the serialized context data by using {@link
@@ -41,7 +46,9 @@ import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
  */
 public class TomcatInvokeInterceptor implements InstanceMethodsAroundInterceptor {
 
-    /**
+	private static final Logger logger = LoggerFactory.getLogger("accessLog");
+
+	/**
      * * The {@link TraceSegment#refs} of current trace segment will reference to the
      * trace segment id of the previous level if the serialized context is not null.
      *
@@ -55,6 +62,7 @@ public class TomcatInvokeInterceptor implements InstanceMethodsAroundInterceptor
     @Override public void beforeMethod(EnhancedInstance objInst, Method method, Object[] allArguments,
         Class<?>[] argumentsTypes, MethodInterceptResult result) throws Throwable {
         HttpServletRequest request = (HttpServletRequest)allArguments[0];
+        HttpServletResponse response = (HttpServletResponse)allArguments[1];
         ContextCarrier contextCarrier = new ContextCarrier();
 
         CarrierItem next = contextCarrier.items();
@@ -63,7 +71,31 @@ public class TomcatInvokeInterceptor implements InstanceMethodsAroundInterceptor
             next.setHeadValue(request.getHeader(next.getHeadKey()));
         }
 
-        AbstractSpan span = ContextManager.createEntrySpan(request.getRequestURI(), contextCarrier);
+		String referer = request.getHeader("referer");
+		String userAgent = request.getHeader("User-Agent");
+
+        Cookie[] cookies = request.getCookies();
+        String sessionId = null;
+        if(cookies!=null){
+            for(Cookie cookie:cookies){
+                if("sessionId".equals(cookie.getName())){
+                    sessionId = cookie.getValue();
+                }
+            }
+        }
+        if(sessionId==null){
+            sessionId = UUID.randomUUID().toString().replaceAll("-","");
+            Cookie cookie = new Cookie("sessionId",sessionId);
+            cookie.setPath("/");
+            cookie.setMaxAge(-1);
+            cookie.setHttpOnly(false);
+            cookie.setDomain(request.getServerName());
+            response.addCookie(cookie);
+        }
+        ContextManager.setSessionId(sessionId);
+		MDC.put("sessionId",sessionId);
+		logger.info("access info :{} \"{} {}\" {} \"{}\" {} \"{}\"", IPUtils.getIpAddr(request),request.getMethod(),request.getRequestURL(),request.getProtocol(),referer==null? "":referer,sessionId,userAgent==null? "":userAgent);
+		AbstractSpan span = ContextManager.createEntrySpan(request.getRequestURI(), contextCarrier);
         Tags.URL.set(span, request.getRequestURL().toString());
         Tags.HTTP.METHOD.set(span, request.getMethod());
         span.setComponent(ComponentsDefine.TOMCAT);

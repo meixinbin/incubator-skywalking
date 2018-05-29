@@ -18,26 +18,19 @@
 
 package org.apache.skywalking.apm.agent.core.jvm;
 
-import io.grpc.Channel;
 import org.apache.skywalking.apm.agent.core.boot.BootService;
 import org.apache.skywalking.apm.agent.core.boot.DefaultImplementor;
 import org.apache.skywalking.apm.agent.core.boot.DefaultNamedThreadFactory;
-import org.apache.skywalking.apm.agent.core.boot.ServiceManager;
 import org.apache.skywalking.apm.agent.core.conf.Config;
 import org.apache.skywalking.apm.agent.core.conf.RemoteDownstreamConfig;
-import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
 import org.apache.skywalking.apm.agent.core.jvm.cpu.CPUProvider;
 import org.apache.skywalking.apm.agent.core.jvm.gc.GCProvider;
 import org.apache.skywalking.apm.agent.core.jvm.memory.MemoryProvider;
 import org.apache.skywalking.apm.agent.core.jvm.memorypool.MemoryPoolProvider;
+import org.apache.skywalking.apm.agent.core.jvm.model.JVMMetric;
+import org.apache.skywalking.apm.agent.core.jvm.model.JVMMetrics;
 import org.apache.skywalking.apm.agent.core.logging.api.ILog;
 import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
-import org.apache.skywalking.apm.agent.core.remote.GRPCChannelListener;
-import org.apache.skywalking.apm.agent.core.remote.GRPCChannelManager;
-import org.apache.skywalking.apm.agent.core.remote.GRPCChannelStatus;
-import org.apache.skywalking.apm.network.proto.JVMMetric;
-import org.apache.skywalking.apm.network.proto.JVMMetrics;
-import org.apache.skywalking.apm.network.proto.JVMMetricsServiceGrpc;
 import org.apache.skywalking.apm.util.RunnableWithExceptionProtection;
 
 import java.util.LinkedList;
@@ -49,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The <code>JVMService</code> represents a timer,
  * which collectors JVM cpu, memory, memorypool and gc info,
- * and send the collected info to Collector through the channel provided by {@link GRPCChannelManager}
+ * and send the collected info to Collector through the channel
  *
  * @author wusheng
  */
@@ -65,7 +58,6 @@ public class JVMService implements BootService, Runnable {
     public void prepare() throws Throwable {
         queue = new LinkedBlockingQueue(Config.Jvm.BUFFER_SIZE);
         sender = new Sender();
-        ServiceManager.INSTANCE.findService(GRPCChannelManager.class).addChannelListener(sender);
     }
 
     @Override
@@ -100,7 +92,7 @@ public class JVMService implements BootService, Runnable {
 
     @Override
     public void run() {
-        if (RemoteDownstreamConfig.Agent.APPLICATION_ID != DictionaryUtil.nullValue()
+        /*if (RemoteDownstreamConfig.Agent.APPLICATION_ID != DictionaryUtil.nullValue()
             && RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID != DictionaryUtil.nullValue()
             ) {
             long currentTimeMillis = System.currentTimeMillis();
@@ -120,16 +112,33 @@ public class JVMService implements BootService, Runnable {
             } catch (Exception e) {
                 logger.error(e, "Collect JVM info fail.");
             }
+        }*/
+        long currentTimeMillis = System.currentTimeMillis();
+        try {
+            JVMMetric jvmMetric = new JVMMetric();
+            jvmMetric.setTime(currentTimeMillis);
+            jvmMetric.setCpu(CPUProvider.INSTANCE.getCpuMetric());
+            jvmMetric.setMemory(MemoryProvider.INSTANCE.getMemoryMetricList());
+            jvmMetric.setMemoryPool(MemoryPoolProvider.INSTANCE.getMemoryPoolMetricList());
+            jvmMetric.setGc(GCProvider.INSTANCE.getGCList());
+
+            if (!queue.offer(jvmMetric)) {
+                queue.poll();
+                queue.offer(jvmMetric);
+            }
+
+            //TODO
+            System.out.println(jvmMetric);
+        } catch (Exception e) {
+            logger.error(e, "Collect JVM info fail.");
         }
     }
 
-    private class Sender implements Runnable, GRPCChannelListener {
-        private volatile GRPCChannelStatus status = GRPCChannelStatus.DISCONNECT;
-        private volatile JVMMetricsServiceGrpc.JVMMetricsServiceBlockingStub stub = null;
+    private class Sender implements Runnable {
 
         @Override
         public void run() {
-            if (RemoteDownstreamConfig.Agent.APPLICATION_ID != DictionaryUtil.nullValue()
+            /*if (RemoteDownstreamConfig.Agent.APPLICATION_ID != DictionaryUtil.nullValue()
                 && RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID != DictionaryUtil.nullValue()
                 ) {
                 if (status == GRPCChannelStatus.CONNECTED) {
@@ -146,16 +155,22 @@ public class JVMService implements BootService, Runnable {
                         logger.error(t, "send JVM metrics to Collector fail.");
                     }
                 }
+            }*/
+            try {
+                JVMMetrics builder = new JVMMetrics();
+                LinkedList<JVMMetric> buffer = new LinkedList<JVMMetric>();
+                queue.drainTo(buffer);
+                if (buffer.size() > 0) {
+                    builder.setMetrics(buffer);
+                    builder.setApplicationInstanceId(RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID);
+
+                    //TODO send data
+                    System.out.println(builder);
+                }
+            } catch (Throwable t) {
+                logger.error(t, "send JVM metrics to Collector fail.");
             }
         }
 
-        @Override
-        public void statusChanged(GRPCChannelStatus status) {
-            if (GRPCChannelStatus.CONNECTED.equals(status)) {
-                Channel channel = ServiceManager.INSTANCE.findService(GRPCChannelManager.class).getChannel();
-                stub = JVMMetricsServiceGrpc.newBlockingStub(channel);
-            }
-            this.status = status;
-        }
     }
 }

@@ -19,12 +19,13 @@
 
 package org.apache.skywalking.apm.agent.core.jvm.memory;
 
+import org.apache.skywalking.apm.agent.core.jvm.model.Memory;
+
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.skywalking.apm.network.proto.Memory;
 
 /**
  * @author wusheng
@@ -41,22 +42,22 @@ public enum MemoryProvider {
         List<Memory> memoryList = new LinkedList<Memory>();
 
         MemoryUsage heapMemoryUsage = memoryMXBean.getHeapMemoryUsage();
-        Memory.Builder heapMemoryBuilder = Memory.newBuilder();
-        heapMemoryBuilder.setIsHeap(true);
+        Memory heapMemoryBuilder = new Memory();
+        heapMemoryBuilder.setHeap(true);
         heapMemoryBuilder.setInit(heapMemoryUsage.getInit());
         heapMemoryBuilder.setUsed(heapMemoryUsage.getUsed());
         heapMemoryBuilder.setCommitted(heapMemoryUsage.getCommitted());
         heapMemoryBuilder.setMax(heapMemoryUsage.getMax());
-        memoryList.add(heapMemoryBuilder.build());
+        memoryList.add(heapMemoryBuilder);
 
         MemoryUsage nonHeapMemoryUsage = memoryMXBean.getNonHeapMemoryUsage();
-        Memory.Builder nonHeapMemoryBuilder = Memory.newBuilder();
-        nonHeapMemoryBuilder.setIsHeap(false);
+        Memory nonHeapMemoryBuilder = new Memory();
+        nonHeapMemoryBuilder.setHeap(false);
         nonHeapMemoryBuilder.setInit(nonHeapMemoryUsage.getInit());
         nonHeapMemoryBuilder.setUsed(nonHeapMemoryUsage.getUsed());
         nonHeapMemoryBuilder.setCommitted(nonHeapMemoryUsage.getCommitted());
         nonHeapMemoryBuilder.setMax(nonHeapMemoryUsage.getMax());
-        memoryList.add(nonHeapMemoryBuilder.build());
+        memoryList.add(nonHeapMemoryBuilder);
 
         return memoryList;
     }

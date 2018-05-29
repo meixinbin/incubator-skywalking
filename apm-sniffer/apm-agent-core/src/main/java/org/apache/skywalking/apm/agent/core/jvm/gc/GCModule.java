@@ -18,11 +18,13 @@
 
 package org.apache.skywalking.apm.agent.core.jvm.gc;
 
+import org.apache.skywalking.apm.agent.core.jvm.model.GC;
+import org.apache.skywalking.apm.agent.core.jvm.model.GCPhrase;
+
 import java.lang.management.GarbageCollectorMXBean;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.skywalking.apm.network.proto.GC;
-import org.apache.skywalking.apm.network.proto.GCPhrase;
+
 
 /**
  * @author wusheng
@@ -69,16 +71,16 @@ public abstract class GCModule implements GCMetricAccessor {
                 continue;
             }
 
-            gcList.add(
-                GC.newBuilder().setPhrase(phrase)
-                    .setCount(gcCount)
-                    .setTime(gcTime)
-                    .build()
-            );
+            GC gc = new GC();
+            gc.setCount(gcCount);
+            gc.setTime(gcTime);
+            gc.setPhrase(phrase);
+            gcList.add(gc);
         }
 
         return gcList;
     }
+
 
     protected abstract String getOldGCName();
 

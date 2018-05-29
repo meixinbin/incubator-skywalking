@@ -19,10 +19,12 @@
 
 package org.apache.skywalking.apm.agent.core.jvm.gc;
 
+import org.apache.skywalking.apm.agent.core.jvm.model.GC;
+import org.apache.skywalking.apm.agent.core.jvm.model.GCPhrase;
+
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.skywalking.apm.network.proto.GC;
-import org.apache.skywalking.apm.network.proto.GCPhrase;
+
 
 /**
  * @author wusheng
@@ -31,8 +33,10 @@ public class UnknowGC implements GCMetricAccessor {
     @Override
     public List<GC> getGCList() {
         List<GC> gcList = new LinkedList<GC>();
-        gcList.add(GC.newBuilder().setPhrase(GCPhrase.NEW).build());
-        gcList.add(GC.newBuilder().setPhrase(GCPhrase.OLD).build());
+        GC gcNew = new GC();
+        gcNew.setPhrase(GCPhrase.NEW);
+        GC gcOld = new GC();
+        gcOld.setPhrase(GCPhrase.OLD);
         return gcList;
     }
 }

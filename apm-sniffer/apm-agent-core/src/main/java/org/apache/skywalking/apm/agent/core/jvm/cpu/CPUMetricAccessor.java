@@ -19,7 +19,7 @@
 
 package org.apache.skywalking.apm.agent.core.jvm.cpu;
 
-import org.apache.skywalking.apm.network.proto.CPU;
+import org.apache.skywalking.apm.agent.core.jvm.model.CPU;
 
 /**
  * @author wusheng
@@ -45,7 +45,8 @@ public abstract class CPUMetricAccessor {
         long cpuCost = cpuTime - lastCPUTimeNs;
         long now = System.nanoTime();
 
-        CPU.Builder cpuBuilder = CPU.newBuilder();
-        return cpuBuilder.setUsagePercent(cpuCost * 1.0d / ((now - lastSampleTimeNs) * cpuCoreNum)).build();
+        CPU cpuBuilder = new CPU();
+        cpuBuilder.setUsagePercent(cpuCost * 1.0d / ((now - lastSampleTimeNs) * cpuCoreNum));
+        return cpuBuilder;
     }
 }

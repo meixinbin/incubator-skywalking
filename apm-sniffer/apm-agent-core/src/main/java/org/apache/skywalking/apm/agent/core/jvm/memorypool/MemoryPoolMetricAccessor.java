@@ -19,8 +19,9 @@
 
 package org.apache.skywalking.apm.agent.core.jvm.memorypool;
 
+import org.apache.skywalking.apm.agent.core.jvm.model.MemoryPool;
+
 import java.util.List;
-import org.apache.skywalking.apm.network.proto.MemoryPool;
 
 /**
  * @author wusheng

@@ -19,10 +19,12 @@
 
 package org.apache.skywalking.apm.agent.core.jvm.memorypool;
 
+import org.apache.skywalking.apm.agent.core.jvm.model.MemoryPool;
+import org.apache.skywalking.apm.agent.core.jvm.model.PoolType;
+
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.skywalking.apm.network.proto.MemoryPool;
-import org.apache.skywalking.apm.network.proto.PoolType;
+
 
 /**
  * @author wusheng
@@ -31,12 +33,12 @@ public class UnknownMemoryPool implements MemoryPoolMetricAccessor {
     @Override
     public List<MemoryPool> getMemoryPoolMetricList() {
         List<MemoryPool> poolList = new LinkedList<MemoryPool>();
-        poolList.add(MemoryPool.newBuilder().setType(PoolType.CODE_CACHE_USAGE).build());
-        poolList.add(MemoryPool.newBuilder().setType(PoolType.NEWGEN_USAGE).build());
-        poolList.add(MemoryPool.newBuilder().setType(PoolType.OLDGEN_USAGE).build());
-        poolList.add(MemoryPool.newBuilder().setType(PoolType.SURVIVOR_USAGE).build());
-        poolList.add(MemoryPool.newBuilder().setType(PoolType.PERMGEN_USAGE).build());
-        poolList.add(MemoryPool.newBuilder().setType(PoolType.METASPACE_USAGE).build());
+        poolList.add(new MemoryPool(PoolType.CODE_CACHE_USAGE));
+        poolList.add(new MemoryPool(PoolType.NEWGEN_USAGE));
+        poolList.add(new MemoryPool(PoolType.OLDGEN_USAGE));
+        poolList.add(new MemoryPool(PoolType.SURVIVOR_USAGE));
+        poolList.add(new MemoryPool(PoolType.PERMGEN_USAGE));
+        poolList.add(new MemoryPool(PoolType.METASPACE_USAGE));
         return new LinkedList<MemoryPool>();
     }
 }

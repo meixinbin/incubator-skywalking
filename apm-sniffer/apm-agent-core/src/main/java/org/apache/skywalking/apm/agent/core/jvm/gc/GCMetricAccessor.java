@@ -19,8 +19,9 @@
 
 package org.apache.skywalking.apm.agent.core.jvm.gc;
 
+import org.apache.skywalking.apm.agent.core.jvm.model.GC;
+
 import java.util.List;
-import org.apache.skywalking.apm.network.proto.GC;
 
 /**
  * @author wusheng
