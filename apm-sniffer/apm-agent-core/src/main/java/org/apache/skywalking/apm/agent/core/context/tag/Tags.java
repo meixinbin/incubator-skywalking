@@ -35,6 +35,16 @@ public final class Tags {
     public static final StringTag URL = new StringTag("url");
 
     /**
+     * URL_REFERER records referer url of the incoming request
+     */
+    public static final StringTag URL_REFERER = new StringTag("referer");
+
+    /**
+     * CLIENT_IP records the realip of incoming request client
+     */
+    public static final StringTag CLIENT_IP = new StringTag("clientIp");
+
+    /**
      * STATUS_CODE records the http status code of the response.
      */
     public static final StringTag STATUS_CODE = new StringTag("status_code");

@@ -27,7 +27,7 @@ import ch.qos.logback.core.util.OptionHelper;
  * @author zhangkewei
  */
 public class LogbackMDCPatternConverter extends MDCConverter {
-    private static final  String CONVERT_KEY = "tid";
+    private static final  String CONVERT_KEY = "traceId";
 
     private boolean convert4TID = false;
     @Override

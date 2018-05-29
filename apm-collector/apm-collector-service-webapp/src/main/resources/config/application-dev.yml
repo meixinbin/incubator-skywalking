@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://120.26.243.97:5432/0002db
+    username: postgres
+    password: MEIxinbin666666
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 60000
+      max-lifetime: 900000
+

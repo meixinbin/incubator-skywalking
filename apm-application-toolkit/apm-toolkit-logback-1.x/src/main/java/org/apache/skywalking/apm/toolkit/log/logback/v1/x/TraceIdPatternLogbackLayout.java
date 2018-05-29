@@ -30,6 +30,7 @@ import ch.qos.logback.classic.PatternLayout;
  */
 public class TraceIdPatternLogbackLayout extends PatternLayout {
     static {
-        defaultConverterMap.put("tid", LogbackPatternConverter.class.getName());
+        defaultConverterMap.put("traceId", LogbackPatternConverter.class.getName());
+        defaultConverterMap.put("sessionId", LogbackPatternConverter4SessionId.class.getName());
     }
 }

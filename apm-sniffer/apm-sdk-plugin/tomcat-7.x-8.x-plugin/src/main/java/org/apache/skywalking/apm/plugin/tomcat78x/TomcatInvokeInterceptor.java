@@ -71,8 +71,18 @@ public class TomcatInvokeInterceptor implements InstanceMethodsAroundInterceptor
             next.setHeadValue(request.getHeader(next.getHeadKey()));
         }
 
-		String referer = request.getHeader("referer");
-		String userAgent = request.getHeader("User-Agent");
+        String referer = request.getHeader("referer");
+        String userAgent = request.getHeader("User-Agent");
+        String clientIp = IPUtils.getIpAddr(request);
+
+        AbstractSpan span = ContextManager.createEntrySpan(request.getRequestURI(), contextCarrier);
+        Tags.URL.set(span, request.getRequestURL().toString());
+        Tags.URL_REFERER.set(span,referer);
+        Tags.CLIENT_IP.set(span,clientIp);
+        Tags.HTTP.METHOD.set(span, request.getMethod());
+        span.setComponent(ComponentsDefine.TOMCAT);
+        SpanLayer.asHttp(span);
+
 
         Cookie[] cookies = request.getCookies();
         String sessionId = null;
@@ -80,6 +90,7 @@ public class TomcatInvokeInterceptor implements InstanceMethodsAroundInterceptor
             for(Cookie cookie:cookies){
                 if("sessionId".equals(cookie.getName())){
                     sessionId = cookie.getValue();
+                    break;
                 }
             }
         }
@@ -93,14 +104,8 @@ public class TomcatInvokeInterceptor implements InstanceMethodsAroundInterceptor
             response.addCookie(cookie);
         }
         ContextManager.setSessionId(sessionId);
-		MDC.put("sessionId",sessionId);
-		logger.info("access info :{} \"{} {}\" {} \"{}\" {} \"{}\"", IPUtils.getIpAddr(request),request.getMethod(),request.getRequestURL(),request.getProtocol(),referer==null? "":referer,sessionId,userAgent==null? "":userAgent);
-		AbstractSpan span = ContextManager.createEntrySpan(request.getRequestURI(), contextCarrier);
-        Tags.URL.set(span, request.getRequestURL().toString());
-        Tags.HTTP.METHOD.set(span, request.getMethod());
-        span.setComponent(ComponentsDefine.TOMCAT);
-        SpanLayer.asHttp(span);
-
+        MDC.put("sessionId",sessionId);
+        logger.info("access info :{} \"{} {}\" {} \"{}\" {} \"{}\"", clientIp,request.getMethod(),request.getRequestURL(),request.getProtocol(),referer==null? "":referer,sessionId,userAgent==null? "":userAgent);
     }
 
     @Override public Object afterMethod(EnhancedInstance objInst, Method method, Object[] allArguments,

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 second" debug="false">
+  <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
+  <property name="LOG_HOME" value="../logs"></property>
+  <property name="ROOT" value="${user.home}/logs"></property>
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_HOME}/info.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!--日志文件输出的文件名-->
+      <fileNamePattern>${LOG_HOME}/info.%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+      <!-- 控制保留的归档文件的最大数量，超出数量就删除旧文件 -->
+      <MaxHistory>100</MaxHistory>
+      <timeBasedFileNamingAndTriggeringPolicy  class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <maxFileSize>128MB</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %level %logger - %msg%n</pattern>
+      <charset class="java.nio.charset.Charset">UTF-8</charset>
+    </encoder>
+  </appender>
+
+  <!-- 控制台输出 -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+      <layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+        <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%traceId] [%sessionId] [%thread] %-5level %logger{36} -%msg%n</Pattern>
+      </layout>
+    </encoder>
+  </appender>
+  <!-- 为 Hibernate sql 定制 -->
+  <logger name="org.hibernate.type.descriptor.sql.BasicBinder"  level="INFO" />
+  <logger name="org.hibernate.type.descriptor.sql.BasicExtractor"  level="INFO" />
+  <logger name="org.hibernate.SQL" level="INFO" />
+  <logger name="org.hibernate.engine.QueryParameters" level="INFO" />
+  <logger name="org.hibernate.engine.query.HQLQueryPlan" level="INFO" />
+  <root level="INFO">
+    <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILE" />
+  </root>
+
+</configuration>

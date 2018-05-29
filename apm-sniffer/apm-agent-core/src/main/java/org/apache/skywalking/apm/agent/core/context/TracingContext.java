@@ -18,26 +18,16 @@
 
 package org.apache.skywalking.apm.agent.core.context;
 
-import java.util.LinkedList;
-import java.util.List;
 import org.apache.skywalking.apm.agent.core.boot.ServiceManager;
 import org.apache.skywalking.apm.agent.core.conf.Config;
-import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
-import org.apache.skywalking.apm.agent.core.context.trace.AbstractTracingSpan;
-import org.apache.skywalking.apm.agent.core.context.trace.EntrySpan;
-import org.apache.skywalking.apm.agent.core.context.trace.ExitSpan;
-import org.apache.skywalking.apm.agent.core.context.trace.LocalSpan;
-import org.apache.skywalking.apm.agent.core.context.trace.NoopExitSpan;
-import org.apache.skywalking.apm.agent.core.context.trace.NoopSpan;
-import org.apache.skywalking.apm.agent.core.context.trace.TraceSegment;
-import org.apache.skywalking.apm.agent.core.context.trace.TraceSegmentRef;
-import org.apache.skywalking.apm.agent.core.context.trace.WithPeerInfo;
-import org.apache.skywalking.apm.agent.core.dictionary.DictionaryManager;
+import org.apache.skywalking.apm.agent.core.context.trace.*;
 import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
-import org.apache.skywalking.apm.agent.core.dictionary.PossibleFound;
 import org.apache.skywalking.apm.agent.core.logging.api.ILog;
 import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
 import org.apache.skywalking.apm.agent.core.sampling.SamplingService;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * The <code>TracingContext</code> represents a core tracing logic controller. It build the final {@link
@@ -254,30 +244,11 @@ public class TracingContext implements AbstractTracerContext {
         final AbstractSpan parentSpan = peek();
         final int parentSpanId = parentSpan == null ? -1 : parentSpan.getSpanId();
         if (parentSpan != null && parentSpan.isEntry()) {
-            entrySpan = (AbstractTracingSpan)DictionaryManager.findOperationNameCodeSection()
-                .findOnly(segment.getApplicationId(), operationName)
-                .doInCondition(new PossibleFound.FoundAndObtain() {
-                    @Override public Object doProcess(int operationId) {
-                        return parentSpan.setOperationId(operationId);
-                    }
-                }, new PossibleFound.NotFoundAndObtain() {
-                    @Override public Object doProcess() {
-                        return parentSpan.setOperationName(operationName);
-                    }
-                });
+            parentSpan.setOperationName(operationName);
+            entrySpan = parentSpan;
             return entrySpan.start();
         } else {
-            entrySpan = (AbstractTracingSpan)DictionaryManager.findOperationNameCodeSection()
-                .findOnly(segment.getApplicationId(), operationName)
-                .doInCondition(new PossibleFound.FoundAndObtain() {
-                    @Override public Object doProcess(int operationId) {
-                        return new EntrySpan(spanIdGenerator++, parentSpanId, operationId);
-                    }
-                }, new PossibleFound.NotFoundAndObtain() {
-                    @Override public Object doProcess() {
-                        return new EntrySpan(spanIdGenerator++, parentSpanId, operationName);
-                    }
-                });
+            entrySpan = new EntrySpan(spanIdGenerator++, parentSpanId, operationName);
             entrySpan.start();
             return push(entrySpan);
         }
@@ -298,19 +269,7 @@ public class TracingContext implements AbstractTracerContext {
         }
         AbstractSpan parentSpan = peek();
         final int parentSpanId = parentSpan == null ? -1 : parentSpan.getSpanId();
-        AbstractTracingSpan span = (AbstractTracingSpan)DictionaryManager.findOperationNameCodeSection()
-            .findOrPrepare4Register(segment.getApplicationId(), operationName, false, false)
-            .doInCondition(new PossibleFound.FoundAndObtain() {
-                @Override
-                public Object doProcess(int operationId) {
-                    return new LocalSpan(spanIdGenerator++, parentSpanId, operationId);
-                }
-            }, new PossibleFound.NotFoundAndObtain() {
-                @Override
-                public Object doProcess() {
-                    return new LocalSpan(spanIdGenerator++, parentSpanId, operationName);
-                }
-            });
+        AbstractTracingSpan span = new LocalSpan(spanIdGenerator++, parentSpanId, operationName);
         span.start();
         return push(span);
     }
@@ -331,55 +290,12 @@ public class TracingContext implements AbstractTracerContext {
             exitSpan = parentSpan;
         } else {
             final int parentSpanId = parentSpan == null ? -1 : parentSpan.getSpanId();
-            exitSpan = (AbstractSpan)DictionaryManager.findNetworkAddressSection()
-                .find(remotePeer).doInCondition(
-                    new PossibleFound.FoundAndObtain() {
-                        @Override
-                        public Object doProcess(final int peerId) {
-                            if (isLimitMechanismWorking()) {
-                                return new NoopExitSpan(peerId);
-                            }
-
-                            return DictionaryManager.findOperationNameCodeSection()
-                                .findOnly(segment.getApplicationId(), operationName)
-                                .doInCondition(
-                                    new PossibleFound.FoundAndObtain() {
-                                        @Override
-                                        public Object doProcess(int operationId) {
-                                            return new ExitSpan(spanIdGenerator++, parentSpanId, operationId, peerId);
-                                        }
-                                    }, new PossibleFound.NotFoundAndObtain() {
-                                        @Override
-                                        public Object doProcess() {
-                                            return new ExitSpan(spanIdGenerator++, parentSpanId, operationName, peerId);
-                                        }
-                                    });
-                        }
-                    },
-                    new PossibleFound.NotFoundAndObtain() {
-                        @Override
-                        public Object doProcess() {
-                            if (isLimitMechanismWorking()) {
-                                return new NoopExitSpan(remotePeer);
-                            }
-
-                            return DictionaryManager.findOperationNameCodeSection()
-                                .findOnly(segment.getApplicationId(), operationName)
-                                .doInCondition(
-                                    new PossibleFound.FoundAndObtain() {
-                                        @Override
-                                        public Object doProcess(int operationId) {
-                                            return new ExitSpan(spanIdGenerator++, parentSpanId, operationId, remotePeer);
-                                        }
-                                    }, new PossibleFound.NotFoundAndObtain() {
-                                        @Override
-                                        public Object doProcess() {
-                                            return new ExitSpan(spanIdGenerator++, parentSpanId, operationName, remotePeer);
-                                        }
-                                    });
-                        }
-                    });
+            if (isLimitMechanismWorking()) {
+                exitSpan =  new NoopExitSpan(remotePeer);
+            }
+            exitSpan =  new ExitSpan(spanIdGenerator++, parentSpanId, operationName, remotePeer);
             push(exitSpan);
+            return exitSpan;
         }
         exitSpan.start();
         return exitSpan;

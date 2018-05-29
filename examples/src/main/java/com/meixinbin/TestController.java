@@ -19,7 +19,7 @@ public class TestController {
 	@RequestMapping("/t1")
 	@ResponseBody
 	public String t1(){
-		System.out.println(MDC.get("tid"));
+		logger.info("====================");
 		System.out.println(TraceContext.traceId());
 		System.out.println(TraceContext.sessionId());
 		return "ok";

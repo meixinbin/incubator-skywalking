@@ -23,10 +23,6 @@ import io.netty.util.internal.ConcurrentSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.skywalking.apm.network.proto.KeyWithIntegerValue;
-import org.apache.skywalking.apm.network.proto.NetworkAddressMappings;
-import org.apache.skywalking.apm.network.proto.NetworkAddressRegisterServiceGrpc;
-import org.apache.skywalking.apm.network.proto.NetworkAddresses;
 
 import static org.apache.skywalking.apm.agent.core.conf.Config.Dictionary.APPLICATION_CODE_BUFFER_SIZE;
 
@@ -52,7 +48,7 @@ public enum NetworkAddressDictionary {
         }
     }
 
-    public void syncRemoteDictionary(
+    /*public void syncRemoteDictionary(
         NetworkAddressRegisterServiceGrpc.NetworkAddressRegisterServiceBlockingStub networkAddressRegisterServiceBlockingStub) {
         if (unRegisterApplications.size() > 0) {
             NetworkAddressMappings networkAddressMappings = networkAddressRegisterServiceBlockingStub.batchRegister(
@@ -64,5 +60,5 @@ public enum NetworkAddressDictionary {
                 }
             }
         }
-    }
+    }*/
 }

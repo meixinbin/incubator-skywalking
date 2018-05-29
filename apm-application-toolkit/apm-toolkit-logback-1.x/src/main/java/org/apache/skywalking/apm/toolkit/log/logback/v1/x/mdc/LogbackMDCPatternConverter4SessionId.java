@@ -19,15 +19,31 @@
 
 package org.apache.skywalking.apm.toolkit.log.logback.v1.x.mdc;
 
-import ch.qos.logback.classic.PatternLayout;
+import ch.qos.logback.classic.pattern.MDCConverter;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.util.OptionHelper;
 
 /**
- * Override "X",SuperClass run before Subclass.
  * @author zhangkewei
  */
-public class TraceIdMDCPatternLogbackLayout extends PatternLayout {
-    static {
-        defaultConverterMap.put("traceId", LogbackMDCPatternConverter.class.getName());
-        defaultConverterMap.put("sessionId", LogbackMDCPatternConverter4SessionId.class.getName());
+public class LogbackMDCPatternConverter4SessionId extends MDCConverter {
+    private static final  String CONVERT_KEY = "sessionId";
+
+    private boolean convert4SessionId = false;
+    @Override
+    public void start() {
+        super.start();
+        String[] key = OptionHelper.extractDefaultReplacement(getFirstOption());
+        if (null != key && key.length > 0 && CONVERT_KEY.equals(key[0])) {
+            convert4SessionId = true;
+        }
+    }
+    @Override
+    public String convert(ILoggingEvent iLoggingEvent) {
+        return convert4SessionId ? convertSessionId() : super.convert(iLoggingEvent);
+    }
+
+    public String convertSessionId() {
+        return "";
     }
 }

@@ -17,17 +17,24 @@
  */
 
 
-package org.apache.skywalking.apm.toolkit.log.logback.v1.x.mdc;
+package org.apache.skywalking.apm.toolkit.log.logback.v1.x;
 
-import ch.qos.logback.classic.PatternLayout;
+import ch.qos.logback.classic.pattern.ClassicConverter;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 
 /**
- * Override "X",SuperClass run before Subclass.
- * @author zhangkewei
+ * Created by wusheng on 2016/12/7.
  */
-public class TraceIdMDCPatternLogbackLayout extends PatternLayout {
-    static {
-        defaultConverterMap.put("traceId", LogbackMDCPatternConverter.class.getName());
-        defaultConverterMap.put("sessionId", LogbackMDCPatternConverter4SessionId.class.getName());
+public class LogbackPatternConverter4SessionId extends ClassicConverter {
+    /**
+     * As default, return "TID: N/A" to the output message,
+     * if sky-walking agent in active mode, return the real traceId in the recent Context, if existed.
+     *
+     * @param iLoggingEvent
+     * @return the sessionId: N/A, empty String, or the real traceId.
+     */
+    @Override
+    public String convert(ILoggingEvent iLoggingEvent) {
+        return "";
     }
 }
