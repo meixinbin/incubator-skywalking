@@ -25,7 +25,6 @@ import org.apache.skywalking.apm.agent.core.context.ContextSnapshot;
 import org.apache.skywalking.apm.agent.core.context.ids.ID;
 import org.apache.skywalking.apm.agent.core.context.model.RefType;
 import org.apache.skywalking.apm.agent.core.context.model.TraceSegmentReference;
-import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
 
 
 /**
@@ -41,21 +40,15 @@ public class TraceSegmentRef {
 
     private int spanId = -1;
 
-    private int peerId = DictionaryUtil.nullValue();
-
     private String peerHost;
 
-    private int entryApplicationInstanceId = DictionaryUtil.nullValue();
+    private int entryApplicationInstanceId = 0;
 
-    private int parentApplicationInstanceId = DictionaryUtil.nullValue();
+    private int parentApplicationInstanceId = 0;
 
     private String entryOperationName;
 
-    private int entryOperationId = DictionaryUtil.nullValue();
-
     private String parentOperationName;
-
-    private int parentOperationId = DictionaryUtil.nullValue();
 
     /**
      * Transform a {@link ContextCarrier} to the <code>TraceSegmentRef</code>
@@ -71,20 +64,14 @@ public class TraceSegmentRef {
         String host = carrier.getPeerHost();
         if (host.charAt(0) == '#') {
             this.peerHost = host.substring(1);
-        } else {
-            this.peerId = Integer.parseInt(host);
         }
         String entryOperationName = carrier.getEntryOperationName();
         if (entryOperationName.charAt(0) == '#') {
             this.entryOperationName = entryOperationName.substring(1);
-        } else {
-            this.entryOperationId = Integer.parseInt(entryOperationName);
         }
         String parentOperationName = carrier.getParentOperationName();
         if (parentOperationName.charAt(0) == '#') {
             this.parentOperationName = parentOperationName.substring(1);
-        } else {
-            this.parentOperationId = Integer.parseInt(parentOperationName);
         }
     }
 
@@ -97,23 +84,15 @@ public class TraceSegmentRef {
         String entryOperationName = snapshot.getEntryOperationName();
         if (entryOperationName.charAt(0) == '#') {
             this.entryOperationName = entryOperationName.substring(1);
-        } else {
-            this.entryOperationId = Integer.parseInt(entryOperationName);
         }
         String parentOperationName = snapshot.getParentOperationName();
         if (parentOperationName.charAt(0) == '#') {
             this.parentOperationName = parentOperationName.substring(1);
-        } else {
-            this.parentOperationId = Integer.parseInt(parentOperationName);
         }
     }
 
     public String getEntryOperationName() {
         return entryOperationName;
-    }
-
-    public int getEntryOperationId() {
-        return entryOperationId;
     }
 
     public int getEntryApplicationInstanceId() {
@@ -124,11 +103,7 @@ public class TraceSegmentRef {
         TraceSegmentReference refBuilder = new TraceSegmentReference();
         if (SegmentRefType.CROSS_PROCESS.equals(type)) {
             refBuilder.setRefType(RefType.CrossProcess);
-            if (peerId == DictionaryUtil.nullValue()) {
-                refBuilder.setNetworkAddress(peerHost);
-            } else {
-                refBuilder.setNetworkAddressId(peerId);
-            }
+            refBuilder.setNetworkAddress(peerHost);
         } else {
             refBuilder.setRefType(RefType.CrossThread);
         }
@@ -137,16 +112,8 @@ public class TraceSegmentRef {
         refBuilder.setEntryApplicationInstanceId(entryApplicationInstanceId);
         refBuilder.setParentTraceSegmentId(traceSegmentId.transform());
         refBuilder.setParentSpanId(spanId);
-        if (entryOperationId == DictionaryUtil.nullValue()) {
-            refBuilder.setEntryServiceName(entryOperationName);
-        } else {
-            refBuilder.setEntryServiceId(entryOperationId);
-        }
-        if (parentOperationId == DictionaryUtil.nullValue()) {
-            refBuilder.setParentServiceName(parentOperationName);
-        } else {
-            refBuilder.setParentServiceId(parentOperationId);
-        }
+        refBuilder.setEntryServiceName(entryOperationName);
+        refBuilder.setParentServiceName(parentOperationName);
         return refBuilder;
     }
 

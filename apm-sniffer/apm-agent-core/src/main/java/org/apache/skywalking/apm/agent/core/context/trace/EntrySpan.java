@@ -18,7 +18,6 @@
 
 package org.apache.skywalking.apm.agent.core.context.trace;
 
-import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
 import org.apache.skywalking.apm.network.trace.component.Component;
 
 /**
@@ -39,11 +38,6 @@ public class EntrySpan extends StackBasedTracingSpan {
 
     public EntrySpan(int spanId, int parentSpanId, String operationName) {
         super(spanId, parentSpanId, operationName);
-        this.currentMaxDepth = 0;
-    }
-
-    public EntrySpan(int spanId, int parentSpanId, int operationId) {
-        super(spanId, parentSpanId, operationId);
         this.currentMaxDepth = 0;
     }
 
@@ -104,15 +98,6 @@ public class EntrySpan extends StackBasedTracingSpan {
     }
 
     @Override
-    public AbstractTracingSpan setOperationId(int operationId) {
-        if (stackDepth == currentMaxDepth) {
-            return super.setOperationId(operationId);
-        } else {
-            return this;
-        }
-    }
-
-    @Override
     public EntrySpan log(Throwable t) {
         super.log(t);
         return this;
@@ -127,7 +112,6 @@ public class EntrySpan extends StackBasedTracingSpan {
     }
 
     private void clearWhenRestart() {
-        this.componentId = DictionaryUtil.nullValue();
         this.componentName = null;
         this.layer = null;
         this.logs = null;

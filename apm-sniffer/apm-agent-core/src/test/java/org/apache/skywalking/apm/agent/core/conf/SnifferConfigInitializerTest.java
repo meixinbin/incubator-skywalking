@@ -35,7 +35,7 @@ public class SnifferConfigInitializerTest {
         System.setProperty("skywalking.collector.servers", "127.0.0.1:8090");
         System.setProperty("skywalking.logging.level", "info");
         SnifferConfigInitializer.initialize();
-        assertThat(Config.Agent.APPLICATION_CODE, is("testApp"));
+        assertThat(Config.Agent.APPLICATION_ID, is("testApp"));
         assertThat(Config.Collector.SERVERS, is("127.0.0.1:8090"));
         assertThat(Config.Logging.LEVEL, is(LogLevel.INFO));
     }

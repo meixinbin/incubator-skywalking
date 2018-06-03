@@ -33,11 +33,6 @@ public class NoopExitSpan extends NoopSpan implements WithPeerInfo {
     }
 
     @Override
-    public int getPeerId() {
-        return peerId;
-    }
-
-    @Override
     public String getPeer() {
         return peer;
     }

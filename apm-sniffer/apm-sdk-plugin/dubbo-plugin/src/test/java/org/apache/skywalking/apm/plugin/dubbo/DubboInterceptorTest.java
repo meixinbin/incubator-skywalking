@@ -105,7 +105,7 @@ public class DubboInterceptorTest {
         when(rpcContext.isConsumerSide()).thenReturn(true);
         allArguments = new Object[] {invoker, invocation};
         argumentTypes = new Class[] {invoker.getClass(), invocation.getClass()};
-        Config.Agent.APPLICATION_CODE = "DubboTestCases-APP";
+        Config.Agent.APPLICATION_ID = "DubboTestCases-APP";
     }
 
     @Test

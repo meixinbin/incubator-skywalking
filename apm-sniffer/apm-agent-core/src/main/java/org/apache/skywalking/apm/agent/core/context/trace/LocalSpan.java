@@ -26,10 +26,6 @@ package org.apache.skywalking.apm.agent.core.context.trace;
  */
 public class LocalSpan extends AbstractTracingSpan {
 
-    public LocalSpan(int spanId, int parentSpanId, int operationId) {
-        super(spanId, parentSpanId, operationId);
-    }
-
     public LocalSpan(int spanId, int parentSpanId, String operationName) {
         super(spanId, parentSpanId, operationName);
     }

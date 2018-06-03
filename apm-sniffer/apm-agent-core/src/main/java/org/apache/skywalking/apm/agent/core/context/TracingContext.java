@@ -21,7 +21,6 @@ package org.apache.skywalking.apm.agent.core.context;
 import org.apache.skywalking.apm.agent.core.boot.ServiceManager;
 import org.apache.skywalking.apm.agent.core.conf.Config;
 import org.apache.skywalking.apm.agent.core.context.trace.*;
-import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
 import org.apache.skywalking.apm.agent.core.logging.api.ILog;
 import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
 import org.apache.skywalking.apm.agent.core.sampling.SamplingService;
@@ -101,47 +100,31 @@ public class TracingContext implements AbstractTracerContext {
 
         WithPeerInfo spanWithPeer = (WithPeerInfo)span;
         String peer = spanWithPeer.getPeer();
-        int peerId = spanWithPeer.getPeerId();
 
         carrier.setTraceSegmentId(this.segment.getTraceSegmentId());
         carrier.setSpanId(span.getSpanId());
 
         carrier.setParentApplicationInstanceId(segment.getApplicationInstanceId());
 
-        if (DictionaryUtil.isNull(peerId)) {
-            carrier.setPeerHost(peer);
-        } else {
-            carrier.setPeerId(peerId);
-        }
+        carrier.setPeerHost(peer);
+
         List<TraceSegmentRef> refs = this.segment.getRefs();
-        int operationId;
         String operationName;
         int entryApplicationInstanceId;
         if (refs != null && refs.size() > 0) {
             TraceSegmentRef ref = refs.get(0);
-            operationId = ref.getEntryOperationId();
             operationName = ref.getEntryOperationName();
             entryApplicationInstanceId = ref.getEntryApplicationInstanceId();
         } else {
             AbstractSpan firstSpan = first();
-            operationId = firstSpan.getOperationId();
             operationName = firstSpan.getOperationName();
             entryApplicationInstanceId = this.segment.getApplicationInstanceId();
         }
         carrier.setEntryApplicationInstanceId(entryApplicationInstanceId);
 
-        if (operationId == DictionaryUtil.nullValue()) {
-            carrier.setEntryOperationName(operationName);
-        } else {
-            carrier.setEntryOperationId(operationId);
-        }
+        carrier.setEntryOperationName(operationName);
 
-        int parentOperationId = first().getOperationId();
-        if (parentOperationId == DictionaryUtil.nullValue()) {
-            carrier.setParentOperationName(first().getOperationName());
-        } else {
-            carrier.setParentOperationId(parentOperationId);
-        }
+        carrier.setParentOperationName(first().getOperationName());
 
         carrier.setDistributedTraceIds(this.segment.getRelatedGlobalTraces());
     }
@@ -181,27 +164,18 @@ public class TracingContext implements AbstractTracerContext {
         AbstractSpan firstSpan = first();
         if (refs != null && refs.size() > 0) {
             TraceSegmentRef ref = refs.get(0);
-            entryOperationId = ref.getEntryOperationId();
             entryOperationName = ref.getEntryOperationName();
             entryApplicationInstanceId = ref.getEntryApplicationInstanceId();
         } else {
-            entryOperationId = firstSpan.getOperationId();
             entryOperationName = firstSpan.getOperationName();
             entryApplicationInstanceId = this.segment.getApplicationInstanceId();
         }
         snapshot.setEntryApplicationInstanceId(entryApplicationInstanceId);
 
-        if (entryOperationId == DictionaryUtil.nullValue()) {
-            snapshot.setEntryOperationName(entryOperationName);
-        } else {
-            snapshot.setEntryOperationId(entryOperationId);
-        }
+        snapshot.setEntryOperationName(entryOperationName);
 
-        if (firstSpan.getOperationId() == DictionaryUtil.nullValue()) {
-            snapshot.setParentOperationName(firstSpan.getOperationName());
-        } else {
-            snapshot.setParentOperationId(firstSpan.getOperationId());
-        }
+        snapshot.setParentOperationName(firstSpan.getOperationName());
+
         return snapshot;
     }
 

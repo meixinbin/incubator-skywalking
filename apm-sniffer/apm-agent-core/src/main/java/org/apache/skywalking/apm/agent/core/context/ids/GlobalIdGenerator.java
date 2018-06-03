@@ -19,8 +19,6 @@
 package org.apache.skywalking.apm.agent.core.context.ids;
 
 import java.util.Random;
-import org.apache.skywalking.apm.agent.core.conf.RemoteDownstreamConfig;
-import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
 
 public final class GlobalIdGenerator {
     private static final ThreadLocal<IDContext> THREAD_ID_SEQUENCE = new ThreadLocal<IDContext>() {

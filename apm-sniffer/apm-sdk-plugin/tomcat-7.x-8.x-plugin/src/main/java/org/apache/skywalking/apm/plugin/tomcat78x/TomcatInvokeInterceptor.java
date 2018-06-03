@@ -24,6 +24,8 @@ import java.util.UUID;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.skywalking.apm.agent.core.conf.Config;
 import org.apache.skywalking.apm.agent.core.context.CarrierItem;
 import org.apache.skywalking.apm.agent.core.context.ContextCarrier;
 import org.apache.skywalking.apm.agent.core.context.ContextManager;
@@ -49,82 +51,89 @@ public class TomcatInvokeInterceptor implements InstanceMethodsAroundInterceptor
 	private static final Logger logger = LoggerFactory.getLogger("accessLog");
 
 	/**
-     * * The {@link TraceSegment#refs} of current trace segment will reference to the
-     * trace segment id of the previous level if the serialized context is not null.
-     *
-     * @param objInst
-     * @param method
-     * @param allArguments
-     * @param argumentsTypes
-     * @param result change this result, if you want to truncate the method.
-     * @throws Throwable
-     */
-    @Override public void beforeMethod(EnhancedInstance objInst, Method method, Object[] allArguments,
-        Class<?>[] argumentsTypes, MethodInterceptResult result) throws Throwable {
-        HttpServletRequest request = (HttpServletRequest)allArguments[0];
-        HttpServletResponse response = (HttpServletResponse)allArguments[1];
-        ContextCarrier contextCarrier = new ContextCarrier();
+	 * * The {@link TraceSegment#refs} of current trace segment will reference to the
+	 * trace segment id of the previous level if the serialized context is not null.
+	 *
+	 * @param objInst
+	 * @param method
+	 * @param allArguments
+	 * @param argumentsTypes
+	 * @param result         change this result, if you want to truncate the method.
+	 * @throws Throwable
+	 */
+	@Override
+	public void beforeMethod(EnhancedInstance objInst, Method method, Object[] allArguments,
+							 Class<?>[] argumentsTypes, MethodInterceptResult result) throws Throwable {
+		HttpServletRequest request = (HttpServletRequest) allArguments[0];
+		HttpServletResponse response = (HttpServletResponse) allArguments[1];
+		ContextCarrier contextCarrier = new ContextCarrier();
 
-        CarrierItem next = contextCarrier.items();
-        while (next.hasNext()) {
-            next = next.next();
-            next.setHeadValue(request.getHeader(next.getHeadKey()));
-        }
+		CarrierItem next = contextCarrier.items();
+		while (next.hasNext()) {
+			next = next.next();
+			next.setHeadValue(request.getHeader(next.getHeadKey()));
+		}
+		String uri = request.getRequestURI();
+		AbstractSpan span = ContextManager.createEntrySpan(uri, contextCarrier);
+		Tags.URL.set(span, request.getRequestURL().toString());
+		Tags.HTTP.METHOD.set(span, request.getMethod());
+		span.setComponent(ComponentsDefine.TOMCAT);
+		SpanLayer.asHttp(span);
+		int suffixIdx = uri.lastIndexOf(".");
+		if (suffixIdx == -1 || !Config.Agent.IGNORE_SUFFIX.contains(uri.substring(suffixIdx))) {
 
-        String referer = request.getHeader("referer");
-        String userAgent = request.getHeader("User-Agent");
-        String clientIp = IPUtils.getIpAddr(request);
+			String referer = request.getHeader("referer");
+			String userAgent = request.getHeader("User-Agent");
+			String clientIp = IPUtils.getIpAddr(request);
 
-        AbstractSpan span = ContextManager.createEntrySpan(request.getRequestURI(), contextCarrier);
-        Tags.URL.set(span, request.getRequestURL().toString());
-        Tags.URL_REFERER.set(span,referer);
-        Tags.CLIENT_IP.set(span,clientIp);
-        Tags.HTTP.METHOD.set(span, request.getMethod());
-        span.setComponent(ComponentsDefine.TOMCAT);
-        SpanLayer.asHttp(span);
+			Tags.URL_REFERER.set(span, referer);
+			Tags.CLIENT_IP.set(span, clientIp);
 
+			Cookie[] cookies = request.getCookies();
+			String sessionId = null;
+			if (cookies != null) {
+				for (Cookie cookie : cookies) {
+					if ("sessionId".equals(cookie.getName())) {
+						sessionId = cookie.getValue();
+						break;
+					}
+				}
+			}
+			if (sessionId == null) {
+				sessionId = UUID.randomUUID().toString().replaceAll("-", "");
+				Cookie cookie = new Cookie("sessionId", sessionId);
+				cookie.setPath("/");
+				cookie.setMaxAge(-1);
+				cookie.setHttpOnly(false);
+				cookie.setDomain(request.getServerName());
+				response.addCookie(cookie);
+			}
 
-        Cookie[] cookies = request.getCookies();
-        String sessionId = null;
-        if(cookies!=null){
-            for(Cookie cookie:cookies){
-                if("sessionId".equals(cookie.getName())){
-                    sessionId = cookie.getValue();
-                    break;
-                }
-            }
-        }
-        if(sessionId==null){
-            sessionId = UUID.randomUUID().toString().replaceAll("-","");
-            Cookie cookie = new Cookie("sessionId",sessionId);
-            cookie.setPath("/");
-            cookie.setMaxAge(-1);
-            cookie.setHttpOnly(false);
-            cookie.setDomain(request.getServerName());
-            response.addCookie(cookie);
-        }
-        ContextManager.setSessionId(sessionId);
-        MDC.put("sessionId",sessionId);
-        logger.info("access info :{} \"{} {}\" {} \"{}\" {} \"{}\"", clientIp,request.getMethod(),request.getRequestURL(),request.getProtocol(),referer==null? "":referer,sessionId,userAgent==null? "":userAgent);
-    }
+			ContextManager.setSessionId(sessionId);
+			MDC.put("sessionId", sessionId);
+			logger.info("access info :{} \"{} {}\" {} \"{}\" {} \"{}\"", clientIp, request.getMethod(), request.getRequestURL(), request.getProtocol(), referer == null ? "" : referer, sessionId, userAgent == null ? "" : userAgent);
+		}
+	}
 
-    @Override public Object afterMethod(EnhancedInstance objInst, Method method, Object[] allArguments,
-        Class<?>[] argumentsTypes, Object ret) throws Throwable {
-        HttpServletResponse response = (HttpServletResponse)allArguments[1];
+	@Override
+	public Object afterMethod(EnhancedInstance objInst, Method method, Object[] allArguments,
+							  Class<?>[] argumentsTypes, Object ret) throws Throwable {
+		HttpServletResponse response = (HttpServletResponse) allArguments[1];
 
-        AbstractSpan span = ContextManager.activeSpan();
-        if (response.getStatus() >= 400) {
-            span.errorOccurred();
-            Tags.STATUS_CODE.set(span, Integer.toString(response.getStatus()));
-        }
-        ContextManager.stopSpan();
-        return ret;
-    }
+		AbstractSpan span = ContextManager.activeSpan();
+		if (response.getStatus() >= 400) {
+			span.errorOccurred();
+			Tags.STATUS_CODE.set(span, Integer.toString(response.getStatus()));
+		}
+		ContextManager.stopSpan();
+		return ret;
+	}
 
-    @Override public void handleMethodException(EnhancedInstance objInst, Method method, Object[] allArguments,
-        Class<?>[] argumentsTypes, Throwable t) {
-        AbstractSpan span = ContextManager.activeSpan();
-        span.log(t);
-        span.errorOccurred();
-    }
+	@Override
+	public void handleMethodException(EnhancedInstance objInst, Method method, Object[] allArguments,
+									  Class<?>[] argumentsTypes, Throwable t) {
+		AbstractSpan span = ContextManager.activeSpan();
+		span.log(t);
+		span.errorOccurred();
+	}
 }

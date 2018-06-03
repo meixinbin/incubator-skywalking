@@ -29,9 +29,11 @@ import org.apache.skywalking.apm.agent.core.context.trace.TraceSegment;
 import org.apache.skywalking.apm.agent.core.logging.api.ILog;
 import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
 import org.apache.skywalking.apm.agent.core.os.OSUtil;
+import org.apache.skywalking.apm.agent.core.remote.dubbo.DubboConfig;
 import org.apache.skywalking.apm.agent.core.remote.model.Application;
 import org.apache.skywalking.apm.agent.core.remote.model.ApplicationInstance;
 import org.apache.skywalking.apm.agent.core.remote.model.ApplicationInstanceHeartbeat;
+import org.apache.skywalking.apm.service.ApplicationService;
 import org.apache.skywalking.apm.util.RunnableWithExceptionProtection;
 
 import java.util.UUID;
@@ -47,8 +49,11 @@ public class AppAndServiceRegisterClient implements BootService, Runnable, Traci
     private static final ILog logger = LogManager.getLogger(AppAndServiceRegisterClient.class);
     private static final String PROCESS_UUID = UUID.randomUUID().toString().replaceAll("-", "");
 
+    private ApplicationService applicationService;
+
     private volatile ScheduledFuture<?> applicationRegisterFuture;
     private volatile long lastSegmentTime = -1;
+	private boolean shouldTry = true;
 
     @Override
     public void prepare() throws Throwable {
@@ -56,6 +61,7 @@ public class AppAndServiceRegisterClient implements BootService, Runnable, Traci
 
     @Override
     public void boot() throws Throwable {
+        applicationService = DubboConfig.getApplicationSerivce();
         applicationRegisterFuture = Executors
             .newSingleThreadScheduledExecutor(new DefaultNamedThreadFactory("AppAndServiceRegisterClient"))
             .scheduleAtFixedRate(new RunnableWithExceptionProtection(this, new RunnableWithExceptionProtection.CallbackWhenException() {
@@ -77,66 +83,31 @@ public class AppAndServiceRegisterClient implements BootService, Runnable, Traci
 
     @Override
     public void run() {
-        Application application = new Application();
-        application.setApplicationCode(Config.Agent.APPLICATION_CODE);
-        //TODO
-        System.out.println(application);
-        ApplicationInstance applicationInstance = new ApplicationInstance();
-        applicationInstance.setApplicationId(RemoteDownstreamConfig.Agent.APPLICATION_ID);
-        applicationInstance.setAgentUUID(PROCESS_UUID);
-        applicationInstance.setRegisterTime(System.currentTimeMillis());
-        applicationInstance.setOsinfo(OSUtil.buildOSInfo());
-        System.out.println(applicationInstance);
-        ApplicationInstanceHeartbeat applicationInstanceHeartbeat = new ApplicationInstanceHeartbeat();
-        applicationInstanceHeartbeat.setApplicationInstanceId(RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID);
-        applicationInstanceHeartbeat.setHeartbeatTime(System.currentTimeMillis());
-        System.out.println(applicationInstanceHeartbeat);
-        //TODO
-        boolean shouldTry = true;
-       /* while (GRPCChannelStatus.CONNECTED.equals(status) && shouldTry) {
-            shouldTry = false;
-            try {
-                if (RemoteDownstreamConfig.Agent.APPLICATION_ID == DictionaryUtil.nullValue()) {
-                    if (applicationRegisterServiceBlockingStub != null) {
-                        ApplicationMapping applicationMapping = applicationRegisterServiceBlockingStub.applicationCodeRegister(
-                            Application.newBuilder().setApplicationCode(Config.Agent.APPLICATION_CODE).build());
-                        if (applicationMapping != null) {
-                            RemoteDownstreamConfig.Agent.APPLICATION_ID = applicationMapping.getApplication().getValue();
-                            shouldTry = true;
-                        }
-                    }
-                } else {
-                    if (instanceDiscoveryServiceBlockingStub != null) {
-                        if (RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID == DictionaryUtil.nullValue()) {
-
-                            ApplicationInstanceMapping instanceMapping = instanceDiscoveryServiceBlockingStub.registerInstance(ApplicationInstance.newBuilder()
-                                .setApplicationId(RemoteDownstreamConfig.Agent.APPLICATION_ID)
-                                .setAgentUUID(PROCESS_UUID)
-                                .setRegisterTime(System.currentTimeMillis())
-                                .setOsinfo(OSUtil.buildOSInfo())
-                                .build());
-                            if (instanceMapping.getApplicationInstanceId() != DictionaryUtil.nullValue()) {
-                                RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID
-                                    = instanceMapping.getApplicationInstanceId();
-                            }
-                        } else {
-                            if (lastSegmentTime - System.currentTimeMillis() > 60 * 1000) {
-                                instanceDiscoveryServiceBlockingStub.heartbeat(ApplicationInstanceHeartbeat.newBuilder()
-                                    .setApplicationInstanceId(RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID)
-                                    .setHeartbeatTime(System.currentTimeMillis())
-                                    .build());
-                            }
-
-                            NetworkAddressDictionary.INSTANCE.syncRemoteDictionary(networkAddressRegisterServiceBlockingStub);
-                            OperationNameDictionary.INSTANCE.syncRemoteDictionary(serviceNameDiscoveryServiceBlockingStub);
-                        }
-                    }
-                }
-            } catch (Throwable t) {
-                logger.error(t, "AppAndServiceRegisterClient execute fail.");
-                ServiceManager.INSTANCE.findService(GRPCChannelManager.class).reportError(t);
-            }
-        }*/
+        if(shouldTry){
+			//register application info
+			Application application = new Application();
+			application.setApplicationId(Config.Agent.APPLICATION_ID);
+			ApplicationInstance applicationInstance = new ApplicationInstance();
+			applicationInstance.setApplicationId(Config.Agent.APPLICATION_ID);
+			applicationInstance.setAgentUUID(PROCESS_UUID);
+			applicationInstance.setRegisterTime(System.currentTimeMillis());
+			applicationInstance.setOsinfo(OSUtil.buildOSInfo());
+			try {
+				applicationService.register(application);
+				int insId = applicationService.registerInstance(applicationInstance);
+				RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID = insId;
+				shouldTry = false;
+			} catch (Exception e) {
+				e.printStackTrace();
+				shouldTry = true;
+			}
+		}
+		if(System.currentTimeMillis()-lastSegmentTime>60*1000){
+			ApplicationInstanceHeartbeat applicationInstanceHeartbeat = new ApplicationInstanceHeartbeat();
+			applicationInstanceHeartbeat.setApplicationInstanceId(RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID);
+			applicationInstanceHeartbeat.setHeartbeatTime(System.currentTimeMillis());
+			applicationService.heartbeat(applicationInstanceHeartbeat);
+		}
     }
 
     @Override

@@ -19,14 +19,14 @@
 
 package org.apache.skywalking.apm.agent.core.context;
 
-import java.io.Serializable;
-import java.util.List;
 import org.apache.skywalking.apm.agent.core.context.ids.DistributedTraceId;
 import org.apache.skywalking.apm.agent.core.context.ids.ID;
 import org.apache.skywalking.apm.agent.core.context.ids.PropagatedTraceId;
 import org.apache.skywalking.apm.agent.core.context.trace.TraceSegment;
-import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
 import org.apache.skywalking.apm.util.StringUtil;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * {@link ContextCarrier} is a data carrier of {@link TracingContext}.
@@ -49,12 +49,12 @@ public class ContextCarrier implements Serializable {
     /**
      * id of parent application instance, it's the id assigned by collector.
      */
-    private int parentApplicationInstanceId = DictionaryUtil.nullValue();
+    private int parentApplicationInstanceId = 0;
 
     /**
      * id of first application instance in this distributed trace, it's the id assigned by collector.
      */
-    private int entryApplicationInstanceId = DictionaryUtil.nullValue();
+    private int entryApplicationInstanceId = 0;
 
     /**
      * peer(ipv4/ipv6/hostname + port) of the server, from client side.
@@ -141,8 +141,8 @@ public class ContextCarrier implements Serializable {
         return traceSegmentId != null
             && traceSegmentId.isValid()
             && getSpanId() > -1
-            && parentApplicationInstanceId != DictionaryUtil.nullValue()
-            && entryApplicationInstanceId != DictionaryUtil.nullValue()
+            && parentApplicationInstanceId != 0
+            && entryApplicationInstanceId != 0
             && !StringUtil.isEmpty(peerHost)
             && !StringUtil.isEmpty(entryOperationName)
             && !StringUtil.isEmpty(parentOperationName)

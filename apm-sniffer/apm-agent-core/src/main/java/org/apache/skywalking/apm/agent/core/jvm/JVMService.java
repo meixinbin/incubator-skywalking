@@ -31,6 +31,8 @@ import org.apache.skywalking.apm.agent.core.jvm.model.JVMMetric;
 import org.apache.skywalking.apm.agent.core.jvm.model.JVMMetrics;
 import org.apache.skywalking.apm.agent.core.logging.api.ILog;
 import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
+import org.apache.skywalking.apm.agent.core.remote.dubbo.DubboConfig;
+import org.apache.skywalking.apm.service.ApplicationService;
 import org.apache.skywalking.apm.util.RunnableWithExceptionProtection;
 
 import java.util.LinkedList;
@@ -52,6 +54,7 @@ public class JVMService implements BootService, Runnable {
     private LinkedBlockingQueue<JVMMetric> queue;
     private volatile ScheduledFuture<?> collectMetricFuture;
     private volatile ScheduledFuture<?> sendMetricFuture;
+    private ApplicationService applicationService;
     private Sender sender;
 
     @Override
@@ -62,6 +65,7 @@ public class JVMService implements BootService, Runnable {
 
     @Override
     public void boot() throws Throwable {
+        applicationService = DubboConfig.getApplicationSerivce();
         collectMetricFuture = Executors
             .newSingleThreadScheduledExecutor(new DefaultNamedThreadFactory("JVMService-produce"))
             .scheduleAtFixedRate(new RunnableWithExceptionProtection(this, new RunnableWithExceptionProtection.CallbackWhenException() {
@@ -92,27 +96,6 @@ public class JVMService implements BootService, Runnable {
 
     @Override
     public void run() {
-        /*if (RemoteDownstreamConfig.Agent.APPLICATION_ID != DictionaryUtil.nullValue()
-            && RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID != DictionaryUtil.nullValue()
-            ) {
-            long currentTimeMillis = System.currentTimeMillis();
-            try {
-                JVMMetric.Builder jvmBuilder = JVMMetric.newBuilder();
-                jvmBuilder.setTime(currentTimeMillis);
-                jvmBuilder.setCpu(CPUProvider.INSTANCE.getCpuMetric());
-                jvmBuilder.addAllMemory(MemoryProvider.INSTANCE.getMemoryMetricList());
-                jvmBuilder.addAllMemoryPool(MemoryPoolProvider.INSTANCE.getMemoryPoolMetricList());
-                jvmBuilder.addAllGc(GCProvider.INSTANCE.getGCList());
-
-                JVMMetric jvmMetric = jvmBuilder.build();
-                if (!queue.offer(jvmMetric)) {
-                    queue.poll();
-                    queue.offer(jvmMetric);
-                }
-            } catch (Exception e) {
-                logger.error(e, "Collect JVM info fail.");
-            }
-        }*/
         long currentTimeMillis = System.currentTimeMillis();
         try {
             JVMMetric jvmMetric = new JVMMetric();
@@ -126,9 +109,6 @@ public class JVMService implements BootService, Runnable {
                 queue.poll();
                 queue.offer(jvmMetric);
             }
-
-            //TODO
-            System.out.println(jvmMetric);
         } catch (Exception e) {
             logger.error(e, "Collect JVM info fail.");
         }
@@ -138,24 +118,6 @@ public class JVMService implements BootService, Runnable {
 
         @Override
         public void run() {
-            /*if (RemoteDownstreamConfig.Agent.APPLICATION_ID != DictionaryUtil.nullValue()
-                && RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID != DictionaryUtil.nullValue()
-                ) {
-                if (status == GRPCChannelStatus.CONNECTED) {
-                    try {
-                        JVMMetrics.Builder builder = JVMMetrics.newBuilder();
-                        LinkedList<JVMMetric> buffer = new LinkedList<JVMMetric>();
-                        queue.drainTo(buffer);
-                        if (buffer.size() > 0) {
-                            builder.addAllMetrics(buffer);
-                            builder.setApplicationInstanceId(RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID);
-                            stub.collect(builder.build());
-                        }
-                    } catch (Throwable t) {
-                        logger.error(t, "send JVM metrics to Collector fail.");
-                    }
-                }
-            }*/
             try {
                 JVMMetrics builder = new JVMMetrics();
                 LinkedList<JVMMetric> buffer = new LinkedList<JVMMetric>();
@@ -163,9 +125,7 @@ public class JVMService implements BootService, Runnable {
                 if (buffer.size() > 0) {
                     builder.setMetrics(buffer);
                     builder.setApplicationInstanceId(RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID);
-
-                    //TODO send data
-                    System.out.println(builder);
+                    applicationService.jvmMetrics(builder);
                 }
             } catch (Throwable t) {
                 logger.error(t, "send JVM metrics to Collector fail.");

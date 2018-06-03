@@ -20,7 +20,6 @@
 package org.apache.skywalking.apm.agent.core.context.trace;
 
 import org.apache.skywalking.apm.agent.core.context.model.SpanObject;
-import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
 import org.apache.skywalking.apm.network.trace.component.Component;
 
 
@@ -39,30 +38,10 @@ import org.apache.skywalking.apm.network.trace.component.Component;
  */
 public class ExitSpan extends StackBasedTracingSpan implements WithPeerInfo {
     private String peer;
-    private int peerId;
 
     public ExitSpan(int spanId, int parentSpanId, String operationName, String peer) {
         super(spanId, parentSpanId, operationName);
         this.peer = peer;
-        this.peerId = DictionaryUtil.nullValue();
-    }
-
-    public ExitSpan(int spanId, int parentSpanId, int operationId, int peerId) {
-        super(spanId, parentSpanId, operationId);
-        this.peer = null;
-        this.peerId = peerId;
-    }
-
-    public ExitSpan(int spanId, int parentSpanId, int operationId, String peer) {
-        super(spanId, parentSpanId, operationId);
-        this.peer = peer;
-        this.peerId = DictionaryUtil.nullValue();
-    }
-
-    public ExitSpan(int spanId, int parentSpanId, String operationName, int peerId) {
-        super(spanId, parentSpanId, operationName);
-        this.peer = null;
-        this.peerId = peerId;
     }
 
     /**
@@ -121,12 +100,8 @@ public class ExitSpan extends StackBasedTracingSpan implements WithPeerInfo {
 
     @Override public SpanObject transform() {
         SpanObject spanBuilder = super.transform();
-        if (peerId != DictionaryUtil.nullValue()) {
-            spanBuilder.setPeerId(peerId);
-        } else {
-            if (peer != null) {
-                spanBuilder.setPeer(peer);
-            }
+        if (peer != null) {
+            spanBuilder.setPeer(peer);
         }
         return spanBuilder;
     }
@@ -138,20 +113,6 @@ public class ExitSpan extends StackBasedTracingSpan implements WithPeerInfo {
         } else {
             return this;
         }
-    }
-
-    @Override
-    public AbstractTracingSpan setOperationId(int operationId) {
-        if (stackDepth == 1) {
-            return super.setOperationId(operationId);
-        } else {
-            return this;
-        }
-    }
-
-    @Override
-    public int getPeerId() {
-        return peerId;
     }
 
     @Override

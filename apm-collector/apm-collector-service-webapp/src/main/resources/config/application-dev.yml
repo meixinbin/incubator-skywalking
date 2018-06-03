@@ -1,12 +1,14 @@
-spring:
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://120.26.243.97:5432/0002db
-    username: postgres
-    password: MEIxinbin666666
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
-      idle-timeout: 60000
-      max-lifetime: 900000
+dubbo:
+  application:
+    name: ${spring.application.name}
+    port: ${random.int[1024,65536]}
+  provider:
+    timeout: 5000
+    retries: 3
+  protocols:
+    - {port: '${random.int[1024,65536]}',name: dubbo}
+  registries:
+    - {id: registry,address: 'zookeeper://127.0.0.1:2181',timeout: 5000,register: true}
+  consumer:
+    check: false
 

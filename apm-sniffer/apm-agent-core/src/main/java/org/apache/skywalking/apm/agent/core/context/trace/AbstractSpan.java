@@ -104,11 +104,7 @@ public interface AbstractSpan {
      */
     int getSpanId();
 
-    int getOperationId();
-
     String getOperationName();
-
-    AbstractSpan setOperationId(int operationId);
 
     /**
      * Reference other trace segment.

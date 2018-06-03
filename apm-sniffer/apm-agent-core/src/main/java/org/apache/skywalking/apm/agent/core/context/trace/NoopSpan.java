@@ -88,16 +88,8 @@ public class NoopSpan implements AbstractSpan {
         return 0;
     }
 
-    @Override public int getOperationId() {
-        return 0;
-    }
-
     @Override public String getOperationName() {
         return "";
-    }
-
-    @Override public AbstractSpan setOperationId(int operationId) {
-        return this;
     }
 
     @Override public void ref(TraceSegmentRef ref) {

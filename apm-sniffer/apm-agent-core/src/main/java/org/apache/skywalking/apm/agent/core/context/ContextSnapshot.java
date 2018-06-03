@@ -19,11 +19,11 @@
 
 package org.apache.skywalking.apm.agent.core.context;
 
-import java.util.List;
-import org.apache.skywalking.apm.agent.core.context.ids.ID;
 import org.apache.skywalking.apm.agent.core.context.ids.DistributedTraceId;
-import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
+import org.apache.skywalking.apm.agent.core.context.ids.ID;
 import org.apache.skywalking.apm.util.StringUtil;
+
+import java.util.List;
 
 /**
  * The <code>ContextSnapshot</code> is a snapshot for current context. The snapshot carries the info for building
@@ -51,7 +51,7 @@ public class ContextSnapshot {
      */
     private DistributedTraceId primaryDistributedTraceId;
 
-    private int entryApplicationInstanceId = DictionaryUtil.nullValue();
+    private int entryApplicationInstanceId = 0;
 
     ContextSnapshot(ID traceSegmentId, int spanId,
         List<DistributedTraceId> distributedTraceIds) {
@@ -97,7 +97,7 @@ public class ContextSnapshot {
     public boolean isValid() {
         return traceSegmentId != null
             && spanId > -1
-            && entryApplicationInstanceId != DictionaryUtil.nullValue()
+            && entryApplicationInstanceId != 0
             && primaryDistributedTraceId != null
             && !StringUtil.isEmpty(entryOperationName)
             && !StringUtil.isEmpty(parentOperationName);

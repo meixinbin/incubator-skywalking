@@ -27,9 +27,11 @@ import org.apache.skywalking.apm.agent.core.context.model.UpstreamSegment;
 import org.apache.skywalking.apm.agent.core.context.trace.TraceSegment;
 import org.apache.skywalking.apm.agent.core.logging.api.ILog;
 import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
+import org.apache.skywalking.apm.agent.core.remote.dubbo.DubboConfig;
 import org.apache.skywalking.apm.commons.datacarrier.DataCarrier;
 import org.apache.skywalking.apm.commons.datacarrier.buffer.BufferStrategy;
 import org.apache.skywalking.apm.commons.datacarrier.consumer.IConsumer;
+import org.apache.skywalking.apm.service.ApplicationService;
 
 import java.util.List;
 
@@ -43,6 +45,7 @@ import static org.apache.skywalking.apm.agent.core.conf.Config.Buffer.CHANNEL_SI
 public class TraceSegmentServiceClient implements BootService, IConsumer<TraceSegment>, TracingContextListener {
     private static final ILog logger = LogManager.getLogger(TraceSegmentServiceClient.class);
     private static final int TIMEOUT = 30 * 1000;
+    private ApplicationService applicationService;
 
     private long lastLogTime;
     private long segmentUplinkedCounter;
@@ -54,6 +57,7 @@ public class TraceSegmentServiceClient implements BootService, IConsumer<TraceSe
 
     @Override
     public void boot() throws Throwable {
+        applicationService = DubboConfig.getApplicationSerivce();
         lastLogTime = System.currentTimeMillis();
         segmentUplinkedCounter = 0;
         segmentAbandonedCounter = 0;
@@ -82,8 +86,9 @@ public class TraceSegmentServiceClient implements BootService, IConsumer<TraceSe
         for (TraceSegment segment : data) {
             try {
                 UpstreamSegment upstreamSegment = segment.transform();
-                System.out.println(upstreamSegment);
+                applicationService.collectorTraceInfo(upstreamSegment);
             } catch (Throwable t) {
+                t.printStackTrace();
                 logger.error(t, "Transform and send UpstreamSegment to collector fail.");
             }
         }

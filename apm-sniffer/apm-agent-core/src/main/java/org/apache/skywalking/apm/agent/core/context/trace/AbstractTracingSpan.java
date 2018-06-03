@@ -18,16 +18,15 @@
 
 package org.apache.skywalking.apm.agent.core.context.trace;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.skywalking.apm.agent.core.context.model.SpanObject;
 import org.apache.skywalking.apm.agent.core.context.model.SpanType;
 import org.apache.skywalking.apm.agent.core.context.util.KeyValuePair;
 import org.apache.skywalking.apm.agent.core.context.util.ThrowableTransformer;
-import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
 import org.apache.skywalking.apm.network.trace.component.Component;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The <code>AbstractTracingSpan</code> represents a group of {@link AbstractSpan} implementations, which belongs a real
@@ -40,7 +39,6 @@ public abstract class AbstractTracingSpan implements AbstractSpan {
     protected int parentSpanId;
     protected List<KeyValuePair> tags;
     protected String operationName;
-    protected int operationId;
     protected SpanLayer layer;
     /**
      * The start time of this Span.
@@ -73,14 +71,6 @@ public abstract class AbstractTracingSpan implements AbstractSpan {
 
     protected AbstractTracingSpan(int spanId, int parentSpanId, String operationName) {
         this.operationName = operationName;
-        this.operationId = DictionaryUtil.nullValue();
-        this.spanId = spanId;
-        this.parentSpanId = parentSpanId;
-    }
-
-    protected AbstractTracingSpan(int spanId, int parentSpanId, int operationId) {
-        this.operationName = null;
-        this.operationId = operationId;
         this.spanId = spanId;
         this.parentSpanId = parentSpanId;
     }
@@ -178,31 +168,12 @@ public abstract class AbstractTracingSpan implements AbstractSpan {
     @Override
     public AbstractTracingSpan setOperationName(String operationName) {
         this.operationName = operationName;
-        this.operationId = DictionaryUtil.nullValue();
-        return this;
-    }
-
-    /**
-     * Set the operation id, which compress by the name.
-     *
-     * @param operationId
-     * @return span instance, for chaining.
-     */
-    @Override
-    public AbstractTracingSpan setOperationId(int operationId) {
-        this.operationId = operationId;
-        this.operationName = null;
         return this;
     }
 
     @Override
     public int getSpanId() {
         return spanId;
-    }
-
-    @Override
-    public int getOperationId() {
-        return operationId;
     }
 
     @Override
@@ -225,6 +196,7 @@ public abstract class AbstractTracingSpan implements AbstractSpan {
     @Override
     public AbstractTracingSpan setComponent(Component component) {
         this.componentId = component.getId();
+        this.componentName = component.getName();
         return this;
     }
 
@@ -253,11 +225,8 @@ public abstract class AbstractTracingSpan implements AbstractSpan {
         spanBuilder.setParentSpanId(parentSpanId);
         spanBuilder.setStartTime(startTime);
         spanBuilder.setEndTime(endTime);
-        if (operationId != DictionaryUtil.nullValue()) {
-            spanBuilder.setOperationNameId(operationId);
-        } else {
-            spanBuilder.setOperationName(operationName);
-        }
+        spanBuilder.setComponentId(componentId);
+        spanBuilder.setOperationName(operationName);
         if (isEntry()) {
             spanBuilder.setSpanType(SpanType.Entry);
         } else if (isExit()) {
@@ -268,12 +237,8 @@ public abstract class AbstractTracingSpan implements AbstractSpan {
         if (this.layer != null) {
             spanBuilder.setSpanLayerValue(this.layer.getCode());
         }
-        if (componentId != DictionaryUtil.nullValue()) {
-            spanBuilder.setComponentId(componentId);
-        } else {
-            if (componentName != null) {
-                spanBuilder.setComponent(componentName);
-            }
+        if (componentName != null) {
+            spanBuilder.setComponent(componentName);
         }
         spanBuilder.setError(errorOccurred);
         if (this.tags != null) {

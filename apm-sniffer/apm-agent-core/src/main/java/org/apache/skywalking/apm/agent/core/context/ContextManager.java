@@ -20,10 +20,8 @@ package org.apache.skywalking.apm.agent.core.context;
 
 import org.apache.skywalking.apm.agent.core.boot.BootService;
 import org.apache.skywalking.apm.agent.core.boot.ServiceManager;
-import org.apache.skywalking.apm.agent.core.conf.RemoteDownstreamConfig;
 import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
 import org.apache.skywalking.apm.agent.core.context.trace.TraceSegment;
-import org.apache.skywalking.apm.agent.core.dictionary.DictionaryUtil;
 import org.apache.skywalking.apm.agent.core.logging.api.ILog;
 import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
 import org.apache.skywalking.apm.agent.core.sampling.SamplingService;
@@ -56,17 +54,7 @@ public class ContextManager implements TracingContextListener, BootService, Igno
                 }
                 context = new IgnoredTracerContext();
             } else {
-                //TODO
-                boolean ignor = RemoteDownstreamConfig.Agent.APPLICATION_ID != DictionaryUtil.nullValue()
-                        && RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID != DictionaryUtil.nullValue();
-                if (true) {
-                    context = EXTEND_SERVICE.createTraceContext(operationName, forceSampling);
-                } else {
-                    /**
-                     * Can't register to collector, no need to trace anything.
-                     */
-                    context = new IgnoredTracerContext();
-                }
+                context = EXTEND_SERVICE.createTraceContext(operationName, forceSampling);
             }
             CONTEXT.set(context);
         }

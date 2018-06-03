@@ -1,9 +1,12 @@
 
+
 server:
   port: 8777
 spring:
   profiles:
     active: dev
+  application:
+    name: collector
   jpa:
     hibernate:
       ddl-auto: update
@@ -13,3 +16,5 @@ spring:
       hibernate.cache.use_second_level_cache: false
     show-sql: true
     database-platform: com.meixinbin.hibernate.dialect.CustomPostgreSqlDialect
+dubbo:
+ scanPackage: com.minshenglife

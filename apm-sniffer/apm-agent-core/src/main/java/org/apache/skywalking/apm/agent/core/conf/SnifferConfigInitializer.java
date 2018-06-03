@@ -70,7 +70,7 @@ public class SnifferConfigInitializer {
             logger.error(e, "Failed to read the system env.");
         }
 
-        if (StringUtil.isEmpty(Config.Agent.APPLICATION_CODE)) {
+        if (StringUtil.isEmpty(Config.Agent.APPLICATION_ID)) {
             throw new ExceptionInInitializerError("`agent.application_code` is missing.");
         }
         if (StringUtil.isEmpty(Config.Collector.SERVERS) && StringUtil.isEmpty(Config.Collector.DIRECT_SERVERS)) {

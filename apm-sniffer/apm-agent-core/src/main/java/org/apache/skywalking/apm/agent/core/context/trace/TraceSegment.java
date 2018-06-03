@@ -21,6 +21,8 @@ package org.apache.skywalking.apm.agent.core.context.trace;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import org.apache.skywalking.apm.agent.core.conf.Config;
 import org.apache.skywalking.apm.agent.core.conf.RemoteDownstreamConfig;
 import org.apache.skywalking.apm.agent.core.context.ids.DistributedTraceId;
 import org.apache.skywalking.apm.agent.core.context.ids.DistributedTraceIds;
@@ -125,7 +127,7 @@ public class TraceSegment {
         return traceSegmentId;
     }
 
-    public int getApplicationId() {
+    public String getApplicationId() {
         return RemoteDownstreamConfig.Agent.APPLICATION_ID;
     }
 
@@ -174,7 +176,7 @@ public class TraceSegment {
         for (AbstractTracingSpan span : this.spans) {
             traceSegmentBuilder.addSpans(span.transform());
         }
-        traceSegmentBuilder.setApplicationId(RemoteDownstreamConfig.Agent.APPLICATION_ID);
+        traceSegmentBuilder.setApplicationId(Config.Agent.APPLICATION_ID);
         traceSegmentBuilder.setApplicationInstanceId(RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID);
         traceSegmentBuilder.setSizeLimited(this.isSizeLimited);
         upstreamBuilder.setSegment(traceSegmentBuilder);
