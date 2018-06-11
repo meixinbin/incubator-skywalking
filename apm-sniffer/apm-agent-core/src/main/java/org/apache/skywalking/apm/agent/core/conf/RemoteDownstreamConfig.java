@@ -33,7 +33,7 @@ public class RemoteDownstreamConfig {
 
         public volatile static String APPLICATION_ID;
 
-        public volatile static int APPLICATION_INSTANCE_ID = 0;
+        public volatile static String APPLICATION_INSTANCE_ID = "0";
     }
 
     public static class Collector {

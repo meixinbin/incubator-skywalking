@@ -16,16 +16,21 @@
  *
  */
 
+package org.apache.skywalking.apm.agent.core.context;
 
-package org.apache.skywalking.apm.agent.core.context.ids;
+import com.minshenglife.guid.GuidGenerate;
+import org.apache.skywalking.apm.agent.core.conf.Config;
+
+import java.util.Random;
 
 /**
- * The <code>NewDistributedTraceId</code> is a {@link DistributedTraceId} with a new generated id.
- *
- * @author wusheng
+ * @author meixinbin
  */
-public class NewDistributedTraceId extends DistributedTraceId {
-    public NewDistributedTraceId() {
-        super(GlobalIdGenerator.generate());
+public final class GlobalIdGenerator {
+
+    private static final GuidGenerate guidGenerate = new GuidGenerate(Config.Agent.APPLICATION_ID);
+
+    public static String generate() {
+        return guidGenerate.next();
     }
 }

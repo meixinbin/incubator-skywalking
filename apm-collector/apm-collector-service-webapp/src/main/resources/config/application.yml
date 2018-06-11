@@ -1,4 +1,6 @@
 
+application:
+  id: 0000
 
 server:
   port: 8777
@@ -7,14 +9,5 @@ spring:
     active: dev
   application:
     name: collector
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate.format_sql: true
-      hibernate.temp.use_jdbc_metadata_defaults: false
-      hibernate.cache.use_second_level_cache: false
-    show-sql: true
-    database-platform: com.meixinbin.hibernate.dialect.CustomPostgreSqlDialect
 dubbo:
  scanPackage: com.minshenglife

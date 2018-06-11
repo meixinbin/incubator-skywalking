@@ -21,6 +21,7 @@ package org.apache.skywalking.apm.agent.core.remote;
 import org.apache.skywalking.apm.agent.core.boot.BootService;
 import org.apache.skywalking.apm.agent.core.boot.DefaultImplementor;
 import org.apache.skywalking.apm.agent.core.boot.DefaultNamedThreadFactory;
+import org.apache.skywalking.apm.agent.core.boot.ServiceManager;
 import org.apache.skywalking.apm.agent.core.conf.Config;
 import org.apache.skywalking.apm.agent.core.conf.RemoteDownstreamConfig;
 import org.apache.skywalking.apm.agent.core.context.TracingContext;
@@ -61,7 +62,7 @@ public class AppAndServiceRegisterClient implements BootService, Runnable, Traci
 
     @Override
     public void boot() throws Throwable {
-        applicationService = DubboConfig.getApplicationSerivce();
+        applicationService = ServiceManager.INSTANCE.findService(DubboConfig.class).getSerivce(ApplicationService.class,"1.0");
         applicationRegisterFuture = Executors
             .newSingleThreadScheduledExecutor(new DefaultNamedThreadFactory("AppAndServiceRegisterClient"))
             .scheduleAtFixedRate(new RunnableWithExceptionProtection(this, new RunnableWithExceptionProtection.CallbackWhenException() {
@@ -94,7 +95,7 @@ public class AppAndServiceRegisterClient implements BootService, Runnable, Traci
 			applicationInstance.setOsinfo(OSUtil.buildOSInfo());
 			try {
 				applicationService.register(application);
-				int insId = applicationService.registerInstance(applicationInstance);
+				String insId = applicationService.registerInstance(applicationInstance);
 				RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID = insId;
 				shouldTry = false;
 			} catch (Exception e) {

@@ -7,12 +7,12 @@ import java.io.Serializable;
  */
 public class TraceSegmentReference implements Serializable{
 	private RefType refType;
-	private UniqueId parentTraceSegmentId;
+	private String parentTraceSegmentId;
 	private int parentSpanId;
-	private int parentApplicationInstanceId;
+	private String parentApplicationInstanceId;
 	private String networkAddress;
 	private int networkAddressId;
-	private int entryApplicationInstanceId;
+	private String entryApplicationInstanceId;
 	private String entryServiceName;
 	private int entryServiceId;
 	private String parentServiceName;
@@ -26,11 +26,11 @@ public class TraceSegmentReference implements Serializable{
 		this.refType = refType;
 	}
 
-	public UniqueId getParentTraceSegmentId() {
+	public String getParentTraceSegmentId() {
 		return parentTraceSegmentId;
 	}
 
-	public void setParentTraceSegmentId(UniqueId parentTraceSegmentId) {
+	public void setParentTraceSegmentId(String parentTraceSegmentId) {
 		this.parentTraceSegmentId = parentTraceSegmentId;
 	}
 
@@ -42,11 +42,11 @@ public class TraceSegmentReference implements Serializable{
 		this.parentSpanId = parentSpanId;
 	}
 
-	public int getParentApplicationInstanceId() {
+	public String getParentApplicationInstanceId() {
 		return parentApplicationInstanceId;
 	}
 
-	public void setParentApplicationInstanceId(int parentApplicationInstanceId) {
+	public void setParentApplicationInstanceId(String parentApplicationInstanceId) {
 		this.parentApplicationInstanceId = parentApplicationInstanceId;
 	}
 
@@ -66,11 +66,11 @@ public class TraceSegmentReference implements Serializable{
 		this.networkAddressId = networkAddressId;
 	}
 
-	public int getEntryApplicationInstanceId() {
+	public String getEntryApplicationInstanceId() {
 		return entryApplicationInstanceId;
 	}
 
-	public void setEntryApplicationInstanceId(int entryApplicationInstanceId) {
+	public void setEntryApplicationInstanceId(String entryApplicationInstanceId) {
 		this.entryApplicationInstanceId = entryApplicationInstanceId;
 	}
 

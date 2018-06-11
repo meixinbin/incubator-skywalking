@@ -3,15 +3,17 @@ package org.apache.skywalking.apm.agent.core.remote.dubbo;
 import com.alibaba.dubbo.config.ApplicationConfig;
 import com.alibaba.dubbo.config.ReferenceConfig;
 import com.alibaba.dubbo.config.RegistryConfig;
-import org.apache.skywalking.apm.agent.core.remote.model.Application;
+import org.apache.skywalking.apm.agent.core.boot.BootService;
+import org.apache.skywalking.apm.agent.core.conf.Config;
 import org.apache.skywalking.apm.service.ApplicationService;
+import org.apache.skywalking.apm.util.StringUtil;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author meixinbin
  */
-public class DubboConfig {
+public class DubboConfig implements BootService {
 
 	private static ApplicationConfig application;
 
@@ -19,43 +21,64 @@ public class DubboConfig {
 
 	private static ConcurrentHashMap<String,Object> serviceCache = new ConcurrentHashMap<String, Object>();
 
-	static {
+	private void init() {
 		application = new ApplicationConfig();
-		application.setName("yyy");
+		application.setName(Config.Agent.APPLICATION_ID);
 
 		// Registry Info
 		registry = new RegistryConfig();
 		registry.setId("zookeeperRegistry");
-		registry.setAddress("zookeeper://127.0.0.1:2181");
+		registry.setAddress(Config.Collector.DUBBO_REGISTRY_ADDRESS);
 //		registry.setUsername("aaa");
 //		registry.setPassword("bbb");
 	}
 
-	public static RegistryConfig getRegistry(){
+	public RegistryConfig getRegistry(){
 		return registry;
 	}
 
-
-	public static ApplicationConfig getApplicationConfig(){
+	public ApplicationConfig getApplicationConfig(){
 		return application;
 	}
 
-
-	public static ApplicationService getApplicationSerivce(){
-		ApplicationService applicationService = (ApplicationService) serviceCache.get(ApplicationService.class.getCanonicalName());
-		if(applicationService!=null){
-			return applicationService;
+	public <T> T getSerivce(Class<T> tClass,String version){
+		version = StringUtil.isEmpty(version)? "1.0":version;
+		String serviceName = tClass.getCanonicalName()+":"+version;
+		T service = (T) serviceCache.get(serviceName);
+		if(service!=null){
+			return service;
 		}
 		// Refer remote service
-		ReferenceConfig<ApplicationService> reference = new ReferenceConfig<ApplicationService>();
+		ReferenceConfig<T> reference = new ReferenceConfig<T>();
 		reference.setApplication(application);
 		reference.setRegistry(registry);
-		reference.setInterface(ApplicationService.class);
-		reference.setVersion("1.0");
+		reference.setInterface(tClass);
+		reference.setVersion(version);
 		reference.setProtocol("dubbo");
-		applicationService = reference.get();
-		serviceCache.put(ApplicationService.class.getCanonicalName(),applicationService);
-		return applicationService;
+		service = reference.get();
+		serviceCache.put(serviceName,service);
+		return service;
+	}
+
+	@Override
+	public void prepare() throws Throwable {
+
+	}
+
+	@Override
+	public void boot() throws Throwable {
+		init();
+		getSerivce(ApplicationService.class,"1.0");
+	}
+
+	@Override
+	public void onComplete() throws Throwable {
+
+	}
+
+	@Override
+	public void shutdown() throws Throwable {
+
 	}
 //
 //	public static void main(String[] args) {

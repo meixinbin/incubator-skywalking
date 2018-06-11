@@ -23,7 +23,7 @@ public interface ApplicationService {
 	 */
 	void register(Application application);
 
-	int registerInstance(ApplicationInstance applicationInstance);
+	String registerInstance(ApplicationInstance applicationInstance);
 
 	void heartbeat(ApplicationInstanceHeartbeat applicationInstanceHeartbeat);
 

@@ -164,10 +164,6 @@
                     <groupId>org.apache.httpcomponents</groupId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>javassist</artifactId>
-                    <groupId>org.javassist</groupId>
-                </exclusion>
-                <exclusion>
                     <artifactId>spring-expression</artifactId>
                     <groupId>org.springframework</groupId>
                 </exclusion>
@@ -202,10 +198,6 @@
                 <exclusion>
                     <artifactId>commons-codec</artifactId>
                     <groupId>commons-codec</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>slf4j-api</artifactId>
-                    <groupId>org.slf4j</groupId>
                 </exclusion>
                 <exclusion>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -249,6 +241,11 @@
             <groupId>org.apache.skywalking</groupId>
             <artifactId>apm-collector-api</artifactId>
             <version>1.0.0-custom</version>
+        </dependency>
+        <dependency>
+            <groupId>com.minshenglife</groupId>
+            <artifactId>guid</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>

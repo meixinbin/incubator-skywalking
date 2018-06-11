@@ -110,7 +110,7 @@ public class TracingContext implements AbstractTracerContext {
 
         List<TraceSegmentRef> refs = this.segment.getRefs();
         String operationName;
-        int entryApplicationInstanceId;
+        String entryApplicationInstanceId;
         if (refs != null && refs.size() > 0) {
             TraceSegmentRef ref = refs.get(0);
             operationName = ref.getEntryOperationName();
@@ -158,9 +158,8 @@ public class TracingContext implements AbstractTracerContext {
         ContextSnapshot snapshot = new ContextSnapshot(segment.getTraceSegmentId(),
             activeSpan().getSpanId(),
             segment.getRelatedGlobalTraces());
-        int entryOperationId;
         String entryOperationName;
-        int entryApplicationInstanceId;
+        String entryApplicationInstanceId;
         AbstractSpan firstSpan = first();
         if (refs != null && refs.size() > 0) {
             TraceSegmentRef ref = refs.get(0);

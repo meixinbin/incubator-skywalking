@@ -21,6 +21,7 @@ package org.apache.skywalking.apm.agent.core.remote;
 
 import org.apache.skywalking.apm.agent.core.boot.BootService;
 import org.apache.skywalking.apm.agent.core.boot.DefaultImplementor;
+import org.apache.skywalking.apm.agent.core.boot.ServiceManager;
 import org.apache.skywalking.apm.agent.core.context.TracingContext;
 import org.apache.skywalking.apm.agent.core.context.TracingContextListener;
 import org.apache.skywalking.apm.agent.core.context.model.UpstreamSegment;
@@ -57,7 +58,7 @@ public class TraceSegmentServiceClient implements BootService, IConsumer<TraceSe
 
     @Override
     public void boot() throws Throwable {
-        applicationService = DubboConfig.getApplicationSerivce();
+        applicationService = ServiceManager.INSTANCE.findService(DubboConfig.class).getSerivce(ApplicationService.class,"1.0");
         lastLogTime = System.currentTimeMillis();
         segmentUplinkedCounter = 0;
         segmentAbandonedCounter = 0;

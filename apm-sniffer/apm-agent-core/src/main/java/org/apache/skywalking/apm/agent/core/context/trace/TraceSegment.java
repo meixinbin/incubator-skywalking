@@ -19,18 +19,15 @@
 
 package org.apache.skywalking.apm.agent.core.context.trace;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.apache.skywalking.apm.agent.core.conf.Config;
 import org.apache.skywalking.apm.agent.core.conf.RemoteDownstreamConfig;
-import org.apache.skywalking.apm.agent.core.context.ids.DistributedTraceId;
-import org.apache.skywalking.apm.agent.core.context.ids.DistributedTraceIds;
-import org.apache.skywalking.apm.agent.core.context.ids.GlobalIdGenerator;
-import org.apache.skywalking.apm.agent.core.context.ids.ID;
-import org.apache.skywalking.apm.agent.core.context.ids.NewDistributedTraceId;
+import org.apache.skywalking.apm.agent.core.context.GlobalIdGenerator;
 import org.apache.skywalking.apm.agent.core.context.model.TraceSegmentObject;
 import org.apache.skywalking.apm.agent.core.context.model.UpstreamSegment;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * {@link TraceSegment} is a segment or fragment of the distributed trace. See https://github.com/opentracing/specification/blob/master/specification.md#the-opentracing-data-model
@@ -43,7 +40,7 @@ public class TraceSegment {
     /**
      * The id of this trace segment. Every segment has its unique-global-id.
      */
-    private ID traceSegmentId;
+    private String traceSegmentId;
 
     /**
      * The refs of parent trace segments, except the primary one. For most RPC call, {@link #refs} contains only one
@@ -68,7 +65,7 @@ public class TraceSegment {
      * parent, <p> and <p> <code>relatedGlobalTraces</code> targets this {@link TraceSegment}'s related call chain, a
      * call chain contains multi {@link TraceSegment}s, only using {@link #refs} is not enough for analysis and ui.
      */
-    private DistributedTraceIds relatedGlobalTraces;
+    private List<String> relatedGlobalTraces;
 
     private boolean ignore = false;
 
@@ -80,8 +77,8 @@ public class TraceSegment {
     public TraceSegment() {
         this.traceSegmentId = GlobalIdGenerator.generate();
         this.spans = new LinkedList<AbstractTracingSpan>();
-        this.relatedGlobalTraces = new DistributedTraceIds();
-        this.relatedGlobalTraces.append(new NewDistributedTraceId());
+        this.relatedGlobalTraces = new ArrayList<String>();
+        this.relatedGlobalTraces.add(traceSegmentId);
     }
 
     /**
@@ -101,8 +98,8 @@ public class TraceSegment {
     /**
      * Establish the line between this segment and all relative global trace ids.
      */
-    public void relatedGlobalTraces(DistributedTraceId distributedTraceId) {
-        relatedGlobalTraces.append(distributedTraceId);
+    public void relatedGlobalTraces(String distributedTraceId) {
+        relatedGlobalTraces.add(distributedTraceId);
     }
 
     /**
@@ -123,7 +120,7 @@ public class TraceSegment {
         return this;
     }
 
-    public ID getTraceSegmentId() {
+    public String getTraceSegmentId() {
         return traceSegmentId;
     }
 
@@ -139,8 +136,8 @@ public class TraceSegment {
         return refs;
     }
 
-    public List<DistributedTraceId> getRelatedGlobalTraces() {
-        return relatedGlobalTraces.getRelatedGlobalTraces();
+    public List<String> getRelatedGlobalTraces() {
+        return relatedGlobalTraces;
     }
 
     public boolean isSingleSpanSegment() {
@@ -162,14 +159,14 @@ public class TraceSegment {
      */
     public UpstreamSegment transform() {
         UpstreamSegment upstreamBuilder = new UpstreamSegment();
-        for (DistributedTraceId distributedTraceId : getRelatedGlobalTraces()) {
-            upstreamBuilder = upstreamBuilder.addGlobalTraceIds(distributedTraceId.toUniqueId());
+        for (String distributedTraceId : getRelatedGlobalTraces()) {
+            upstreamBuilder = upstreamBuilder.addGlobalTraceIds(distributedTraceId);
         }
         TraceSegmentObject traceSegmentBuilder = new TraceSegmentObject();
         /**
          * Trace Segment
          */
-        traceSegmentBuilder.setTraceSegmentId(this.traceSegmentId.transform());
+        traceSegmentBuilder.setTraceSegmentId(this.traceSegmentId);
         // Don't serialize TraceSegmentReference
 
         // SpanObject
@@ -193,7 +190,7 @@ public class TraceSegment {
             '}';
     }
 
-    public int getApplicationInstanceId() {
+    public String getApplicationInstanceId() {
         return RemoteDownstreamConfig.Agent.APPLICATION_INSTANCE_ID;
     }
 }

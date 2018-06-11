@@ -10,7 +10,7 @@ public class JVMMetrics implements Serializable{
 
 	private List<JVMMetric> metrics;
 
-	private int applicationInstanceId;
+	private String applicationInstanceId;
 
 	public List<JVMMetric> getMetrics() {
 		return metrics;
@@ -20,11 +20,11 @@ public class JVMMetrics implements Serializable{
 		this.metrics = metrics;
 	}
 
-	public int getApplicationInstanceId() {
+	public String getApplicationInstanceId() {
 		return applicationInstanceId;
 	}
 
-	public void setApplicationInstanceId(int applicationInstanceId) {
+	public void setApplicationInstanceId(String applicationInstanceId) {
 		this.applicationInstanceId = applicationInstanceId;
 	}
 

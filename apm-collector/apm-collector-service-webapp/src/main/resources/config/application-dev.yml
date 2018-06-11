@@ -12,3 +12,10 @@ dubbo:
   consumer:
     check: false
 
+spring:
+  data:
+    elasticsearch:
+      cluster-name: 'my-application'
+      repositories:
+        enabled: true
+      cluster-nodes: '10.0.2.39:9300'

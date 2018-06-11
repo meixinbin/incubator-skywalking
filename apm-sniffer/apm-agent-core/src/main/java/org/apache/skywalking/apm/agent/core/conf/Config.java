@@ -73,10 +73,7 @@ public class Config {
     }
 
     public static class Collector {
-        /**
-         * grpc channel status check interval
-         */
-        public static long GRPC_CHANNEL_CHECK_INTERVAL = 30;
+
         /**
          * application and service registry check interval
          */
@@ -93,21 +90,9 @@ public class Config {
          * SERVERS="127.0.0.1:10800"  for single collector node.
          * SERVERS="10.2.45.126:10800,10.2.45.127:10800"  for multi collector nodes.
          */
-        public static String SERVERS = "";
+        public static String DUBBO_REGISTRY_ID = "defaultRegistry";
 
-        /**
-         * Collector agent_gRPC/grpc service addresses.
-         * Secondary address setting, only effect when #SERVERS is empty.
-         *
-         * By using this, no discovery mechanism provided. The agent only uses these addresses to uplink data.
-         *
-         */
-        public static String DIRECT_SERVERS = "";
-
-        /**
-         * Collector service discovery REST service name
-         */
-        public static String DISCOVERY_SERVICE_NAME = "/agent/gRPC";
+        public static String DUBBO_REGISTRY_ADDRESS = "zookeeper://127.0.0.1:2181";
     }
 
     public static class Jvm {
@@ -121,15 +106,6 @@ public class Config {
         public static int CHANNEL_SIZE = 5;
 
         public static int BUFFER_SIZE = 300;
-    }
-
-    public static class Dictionary {
-        /**
-         * The buffer size of application codes and peer
-         */
-        public static int APPLICATION_CODE_BUFFER_SIZE = 10 * 10000;
-
-        public static int OPERATION_NAME_BUFFER_SIZE = 1000 * 10000;
     }
 
     public static class Logging {

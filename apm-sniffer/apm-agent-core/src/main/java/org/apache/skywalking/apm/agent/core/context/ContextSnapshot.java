@@ -19,8 +19,6 @@
 
 package org.apache.skywalking.apm.agent.core.context;
 
-import org.apache.skywalking.apm.agent.core.context.ids.DistributedTraceId;
-import org.apache.skywalking.apm.agent.core.context.ids.ID;
 import org.apache.skywalking.apm.util.StringUtil;
 
 import java.util.List;
@@ -35,7 +33,7 @@ public class ContextSnapshot {
     /**
      * trace segment id of the parent trace segment.
      */
-    private ID traceSegmentId;
+    private String traceSegmentId;
 
     /**
      * span id of the parent span, in parent trace segment.
@@ -46,15 +44,12 @@ public class ContextSnapshot {
 
     private String parentOperationName;
 
-    /**
-     * {@link DistributedTraceId}
-     */
-    private DistributedTraceId primaryDistributedTraceId;
+    private String primaryDistributedTraceId;
 
-    private int entryApplicationInstanceId = 0;
+    private String entryApplicationInstanceId;
 
-    ContextSnapshot(ID traceSegmentId, int spanId,
-        List<DistributedTraceId> distributedTraceIds) {
+    ContextSnapshot(String traceSegmentId, int spanId,
+        List<String> distributedTraceIds) {
         this.traceSegmentId = traceSegmentId;
         this.spanId = spanId;
         if (distributedTraceIds != null) {
@@ -78,11 +73,11 @@ public class ContextSnapshot {
         this.parentOperationName = parentOperationId + "";
     }
 
-    public DistributedTraceId getDistributedTraceId() {
+    public String getDistributedTraceId() {
         return primaryDistributedTraceId;
     }
 
-    public ID getTraceSegmentId() {
+    public String getTraceSegmentId() {
         return traceSegmentId;
     }
 
@@ -97,7 +92,7 @@ public class ContextSnapshot {
     public boolean isValid() {
         return traceSegmentId != null
             && spanId > -1
-            && entryApplicationInstanceId != 0
+            && entryApplicationInstanceId != null
             && primaryDistributedTraceId != null
             && !StringUtil.isEmpty(entryOperationName)
             && !StringUtil.isEmpty(parentOperationName);
@@ -107,11 +102,11 @@ public class ContextSnapshot {
         return entryOperationName;
     }
 
-    public void setEntryApplicationInstanceId(int entryApplicationInstanceId) {
+    public void setEntryApplicationInstanceId(String entryApplicationInstanceId) {
         this.entryApplicationInstanceId = entryApplicationInstanceId;
     }
 
-    public int getEntryApplicationInstanceId() {
+    public String getEntryApplicationInstanceId() {
         return entryApplicationInstanceId;
     }
     

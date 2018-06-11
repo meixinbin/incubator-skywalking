@@ -8,20 +8,20 @@ import java.util.List;
  * @author meixinbin
  */
 public class TraceSegmentObject implements Serializable{
-	private UniqueId traceSegmentId;
+	private String traceSegmentId;
 	private List<SpanObject> spans = new ArrayList<SpanObject>();
 	private String applicationId;
-	private int applicationInstanceId;
+	private String applicationInstanceId;
 	private boolean isSizeLimited;
 
 	public void addSpans(SpanObject span){
 		spans.add(span);
 	}
-	public UniqueId getTraceSegmentId() {
+	public String getTraceSegmentId() {
 		return traceSegmentId;
 	}
 
-	public void setTraceSegmentId(UniqueId traceSegmentId) {
+	public void setTraceSegmentId(String traceSegmentId) {
 		this.traceSegmentId = traceSegmentId;
 	}
 
@@ -41,11 +41,11 @@ public class TraceSegmentObject implements Serializable{
 		this.applicationId = applicationId;
 	}
 
-	public int getApplicationInstanceId() {
+	public String getApplicationInstanceId() {
 		return applicationInstanceId;
 	}
 
-	public void setApplicationInstanceId(int applicationInstanceId) {
+	public void setApplicationInstanceId(String applicationInstanceId) {
 		this.applicationInstanceId = applicationInstanceId;
 	}
 

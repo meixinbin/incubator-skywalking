@@ -9,15 +9,15 @@ import java.util.List;
  */
 public class DiskMetrics implements Serializable{
 
-	private int applicationInstanceId;
+	private String applicationInstanceId;
 
 	private List<Disk> list;
 
-	public int getApplicationInstanceId() {
+	public String getApplicationInstanceId() {
 		return applicationInstanceId;
 	}
 
-	public void setApplicationInstanceId(int applicationInstanceId) {
+	public void setApplicationInstanceId(String applicationInstanceId) {
 		this.applicationInstanceId = applicationInstanceId;
 	}
 

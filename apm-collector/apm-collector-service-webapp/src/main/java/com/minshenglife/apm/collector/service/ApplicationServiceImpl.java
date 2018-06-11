@@ -1,6 +1,15 @@
 package com.minshenglife.apm.collector.service;
 
 import com.alibaba.dubbo.config.annotation.DubboService;
+import com.minshenglife.apm.collector.entity.ApplicationEntity;
+import com.minshenglife.apm.collector.entity.ApplicationInstanceEntity;
+import com.minshenglife.apm.collector.entity.ApplicationInstanceHeartbeatEntity;
+import com.minshenglife.apm.collector.entity.JVMMetricEntity;
+import com.minshenglife.apm.collector.repository.ApplicationInstanceHeartbeatRepository;
+import com.minshenglife.apm.collector.repository.ApplicationInstanceRepository;
+import com.minshenglife.apm.collector.repository.ApplicationRepository;
+import com.minshenglife.apm.collector.repository.JVMMetricRepository;
+import com.minshenglife.guid.GuidGenerate;
 import org.apache.skywalking.apm.agent.core.context.model.UpstreamSegment;
 import org.apache.skywalking.apm.agent.core.disk.model.DiskMetrics;
 import org.apache.skywalking.apm.agent.core.jvm.model.JVMMetric;
@@ -9,6 +18,8 @@ import org.apache.skywalking.apm.agent.core.remote.model.Application;
 import org.apache.skywalking.apm.agent.core.remote.model.ApplicationInstance;
 import org.apache.skywalking.apm.agent.core.remote.model.ApplicationInstanceHeartbeat;
 import org.apache.skywalking.apm.service.ApplicationService;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -18,31 +29,62 @@ import java.util.List;
 @DubboService(version = "1.0")
 public class ApplicationServiceImpl implements ApplicationService {
 
+	@Autowired
+	private ApplicationRepository applicationRepository;
+
+	@Autowired
+	private ApplicationInstanceRepository applicationInstanceRepository;
+
+	@Autowired
+	private ApplicationInstanceHeartbeatRepository applicationInstanceHeartbeatRepository;
+
+	@Autowired
+	private JVMMetricRepository jvmMetricRepository;
+
+	@Autowired
+	private GuidGenerate guidGenerate;
+
 	@Override
 	public void register(Application application) {
-		System.out.println(application);
+		ApplicationEntity applicationEntity = new ApplicationEntity();
+		BeanUtils.copyProperties(application,applicationEntity);
+		applicationRepository.save(applicationEntity);
 	}
 
 	@Override
-	public int registerInstance(ApplicationInstance applicationInstance) {
-		System.out.println(applicationInstance);
-		return 1;
+	public String registerInstance(ApplicationInstance applicationInstance) {
+		ApplicationInstanceEntity applicationInstanceEntity = new ApplicationInstanceEntity();
+		BeanUtils.copyProperties(applicationInstance,applicationInstanceEntity);
+		applicationInstanceEntity.setId(guidGenerate.next());
+		ApplicationInstanceEntity instanceEntity = applicationInstanceRepository.save(applicationInstanceEntity);
+		return instanceEntity.getId();
 	}
 
 	@Override
 	public void heartbeat(ApplicationInstanceHeartbeat applicationInstanceHeartbeat) {
-		System.out.println(applicationInstanceHeartbeat);
+		ApplicationInstanceHeartbeatEntity applicationInstanceHeartbeatEntity = new ApplicationInstanceHeartbeatEntity();
+
+		BeanUtils.copyProperties(applicationInstanceHeartbeat,applicationInstanceHeartbeatEntity);
+		applicationInstanceHeartbeatEntity.setId(guidGenerate.next());
+		applicationInstanceHeartbeatRepository.save(applicationInstanceHeartbeatEntity);
 	}
 
 	@Override
 	public void collectorTraceInfo(UpstreamSegment upstreamSegment) {
 
-		System.out.println(upstreamSegment);
+
 	}
 
 	@Override
 	public void jvmMetrics(JVMMetrics jvmMetrics) {
-		System.out.println(jvmMetrics);
+		List<JVMMetric> metrics = jvmMetrics.getMetrics();
+		for(JVMMetric jvmMetric:metrics){
+			JVMMetricEntity jvmMetricEntity = new JVMMetricEntity();
+			BeanUtils.copyProperties(jvmMetric,jvmMetricEntity);
+			jvmMetricEntity.setApplicationInstanceId(jvmMetrics.getApplicationInstanceId());
+			jvmMetricEntity.setId(guidGenerate.next());
+			jvmMetricRepository.save(jvmMetricEntity);
+		}
 
 	}
 

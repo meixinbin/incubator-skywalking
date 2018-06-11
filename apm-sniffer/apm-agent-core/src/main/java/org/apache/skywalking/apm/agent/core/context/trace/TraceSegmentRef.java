@@ -22,7 +22,6 @@ package org.apache.skywalking.apm.agent.core.context.trace;
 import org.apache.skywalking.apm.agent.core.conf.RemoteDownstreamConfig;
 import org.apache.skywalking.apm.agent.core.context.ContextCarrier;
 import org.apache.skywalking.apm.agent.core.context.ContextSnapshot;
-import org.apache.skywalking.apm.agent.core.context.ids.ID;
 import org.apache.skywalking.apm.agent.core.context.model.RefType;
 import org.apache.skywalking.apm.agent.core.context.model.TraceSegmentReference;
 
@@ -36,15 +35,15 @@ import org.apache.skywalking.apm.agent.core.context.model.TraceSegmentReference;
 public class TraceSegmentRef {
     private SegmentRefType type;
 
-    private ID traceSegmentId;
+    private String traceSegmentId;
 
     private int spanId = -1;
 
     private String peerHost;
 
-    private int entryApplicationInstanceId = 0;
+    private String entryApplicationInstanceId = "0";
 
-    private int parentApplicationInstanceId = 0;
+    private String parentApplicationInstanceId = "0";
 
     private String entryOperationName;
 
@@ -95,7 +94,7 @@ public class TraceSegmentRef {
         return entryOperationName;
     }
 
-    public int getEntryApplicationInstanceId() {
+    public String getEntryApplicationInstanceId() {
         return entryApplicationInstanceId;
     }
 
@@ -110,7 +109,7 @@ public class TraceSegmentRef {
 
         refBuilder.setParentApplicationInstanceId(parentApplicationInstanceId);
         refBuilder.setEntryApplicationInstanceId(entryApplicationInstanceId);
-        refBuilder.setParentTraceSegmentId(traceSegmentId.transform());
+        refBuilder.setParentTraceSegmentId(traceSegmentId);
         refBuilder.setParentSpanId(spanId);
         refBuilder.setEntryServiceName(entryOperationName);
         refBuilder.setParentServiceName(parentOperationName);

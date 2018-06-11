@@ -8,18 +8,18 @@ import java.util.List;
  * @author meixinbin
  */
 public class UpstreamSegment implements Serializable{
-	private List<UniqueId> globalTraceIds;
+	private List<String> globalTraceIds;
 	private TraceSegmentObject segment;
 
 	public UpstreamSegment() {
-		this.globalTraceIds = new ArrayList<UniqueId>();
+		this.globalTraceIds = new ArrayList<String>();
 	}
 
-	public List<UniqueId> getGlobalTraceIds() {
+	public List<String> getGlobalTraceIds() {
 		return globalTraceIds;
 	}
 
-	public void setGlobalTraceIds(List<UniqueId> globalTraceIds) {
+	public void setGlobalTraceIds(List<String> globalTraceIds) {
 		this.globalTraceIds = globalTraceIds;
 	}
 
@@ -31,7 +31,7 @@ public class UpstreamSegment implements Serializable{
 		this.segment = segment;
 	}
 
-	public UpstreamSegment addGlobalTraceIds(UniqueId uniqueId){
+	public UpstreamSegment addGlobalTraceIds(String uniqueId){
 		this.globalTraceIds.add(uniqueId);
 		return this;
 	}

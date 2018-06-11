@@ -6,14 +6,14 @@ import java.io.Serializable;
  * @author meixinbin
  */
 public class ApplicationInstanceHeartbeat implements Serializable{
-	private int applicationInstanceId;
+	private String applicationInstanceId;
 	private long heartbeatTime;
 
-	public int getApplicationInstanceId() {
+	public String getApplicationInstanceId() {
 		return applicationInstanceId;
 	}
 
-	public void setApplicationInstanceId(int applicationInstanceId) {
+	public void setApplicationInstanceId(String applicationInstanceId) {
 		this.applicationInstanceId = applicationInstanceId;
 	}
 

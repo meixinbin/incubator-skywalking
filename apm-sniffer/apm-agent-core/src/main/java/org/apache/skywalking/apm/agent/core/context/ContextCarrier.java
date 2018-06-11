@@ -19,9 +19,6 @@
 
 package org.apache.skywalking.apm.agent.core.context;
 
-import org.apache.skywalking.apm.agent.core.context.ids.DistributedTraceId;
-import org.apache.skywalking.apm.agent.core.context.ids.ID;
-import org.apache.skywalking.apm.agent.core.context.ids.PropagatedTraceId;
 import org.apache.skywalking.apm.agent.core.context.trace.TraceSegment;
 import org.apache.skywalking.apm.util.StringUtil;
 
@@ -38,7 +35,7 @@ public class ContextCarrier implements Serializable {
     /**
      * {@link TraceSegment#traceSegmentId}
      */
-    private ID traceSegmentId;
+    private String traceSegmentId;
 
     /**
      * id of parent span.
@@ -49,12 +46,12 @@ public class ContextCarrier implements Serializable {
     /**
      * id of parent application instance, it's the id assigned by collector.
      */
-    private int parentApplicationInstanceId = 0;
+    private String parentApplicationInstanceId;
 
     /**
      * id of first application instance in this distributed trace, it's the id assigned by collector.
      */
-    private int entryApplicationInstanceId = 0;
+    private String entryApplicationInstanceId;
 
     /**
      * peer(ipv4/ipv6/hostname + port) of the server, from client side.
@@ -74,9 +71,9 @@ public class ContextCarrier implements Serializable {
     private String parentOperationName;
 
     /**
-     * {@link DistributedTraceId}, also known as TraceId
+     *  also known as TraceId
      */
-    private DistributedTraceId primaryDistributedTraceId;
+    private String primaryDistributedTraceId;
 
     public CarrierItem items() {
         SW3CarrierItem carrierItem = new SW3CarrierItem(this, null);
@@ -93,14 +90,14 @@ public class ContextCarrier implements Serializable {
     String serialize() {
         if (this.isValid()) {
             return StringUtil.join('|',
-                this.getTraceSegmentId().encode(),
+                this.getTraceSegmentId(),
                 this.getSpanId() + "",
                 this.getParentApplicationInstanceId() + "",
                 this.getEntryApplicationInstanceId() + "",
                 this.getPeerHost(),
                 this.getEntryOperationName(),
                 this.getParentOperationName(),
-                this.getPrimaryDistributedTraceId().encode());
+                this.getPrimaryDistributedTraceId()+"");
         } else {
             return "";
         }
@@ -116,14 +113,14 @@ public class ContextCarrier implements Serializable {
             String[] parts = text.split("\\|", 8);
             if (parts.length == 8) {
                 try {
-                    this.traceSegmentId = new ID(parts[0]);
+                    this.traceSegmentId = parts[0];
                     this.spanId = Integer.parseInt(parts[1]);
-                    this.parentApplicationInstanceId = Integer.parseInt(parts[2]);
-                    this.entryApplicationInstanceId = Integer.parseInt(parts[3]);
+                    this.parentApplicationInstanceId = parts[2];
+                    this.entryApplicationInstanceId = parts[3];
                     this.peerHost = parts[4];
                     this.entryOperationName = parts[5];
                     this.parentOperationName = parts[6];
-                    this.primaryDistributedTraceId = new PropagatedTraceId(parts[7]);
+                    this.primaryDistributedTraceId = parts[7];
                 } catch (NumberFormatException e) {
 
                 }
@@ -139,10 +136,9 @@ public class ContextCarrier implements Serializable {
      */
     public boolean isValid() {
         return traceSegmentId != null
-            && traceSegmentId.isValid()
             && getSpanId() > -1
-            && parentApplicationInstanceId != 0
-            && entryApplicationInstanceId != 0
+            && parentApplicationInstanceId != null
+            && entryApplicationInstanceId != null
             && !StringUtil.isEmpty(peerHost)
             && !StringUtil.isEmpty(entryOperationName)
             && !StringUtil.isEmpty(parentOperationName)
@@ -157,19 +153,11 @@ public class ContextCarrier implements Serializable {
         this.entryOperationName = '#' + entryOperationName;
     }
 
-    void setEntryOperationId(int entryOperationId) {
-        this.entryOperationName = entryOperationId + "";
-    }
-
     void setParentOperationName(String parentOperationName) {
         this.parentOperationName = '#' + parentOperationName;
     }
 
-    void setParentOperationId(int parentOperationId) {
-        this.parentOperationName = parentOperationId + "";
-    }
-
-    public ID getTraceSegmentId() {
+    public String getTraceSegmentId() {
         return traceSegmentId;
     }
 
@@ -177,7 +165,7 @@ public class ContextCarrier implements Serializable {
         return spanId;
     }
 
-    void setTraceSegmentId(ID traceSegmentId) {
+    void setTraceSegmentId(String traceSegmentId) {
         this.traceSegmentId = traceSegmentId;
     }
 
@@ -185,11 +173,11 @@ public class ContextCarrier implements Serializable {
         this.spanId = spanId;
     }
 
-    public int getParentApplicationInstanceId() {
+    public String getParentApplicationInstanceId() {
         return parentApplicationInstanceId;
     }
 
-    void setParentApplicationInstanceId(int parentApplicationInstanceId) {
+    void setParentApplicationInstanceId(String parentApplicationInstanceId) {
         this.parentApplicationInstanceId = parentApplicationInstanceId;
     }
 
@@ -205,15 +193,15 @@ public class ContextCarrier implements Serializable {
         this.peerHost = peerId + "";
     }
 
-    public DistributedTraceId getDistributedTraceId() {
+    public String getDistributedTraceId() {
         return primaryDistributedTraceId;
     }
 
-    public void setDistributedTraceIds(List<DistributedTraceId> distributedTraceIds) {
+    public void setDistributedTraceIds(List<String> distributedTraceIds) {
         this.primaryDistributedTraceId = distributedTraceIds.get(0);
     }
 
-    private DistributedTraceId getPrimaryDistributedTraceId() {
+    private String getPrimaryDistributedTraceId() {
         return primaryDistributedTraceId;
     }
 
@@ -221,11 +209,11 @@ public class ContextCarrier implements Serializable {
         return parentOperationName;
     }
 
-    public int getEntryApplicationInstanceId() {
+    public String getEntryApplicationInstanceId() {
         return entryApplicationInstanceId;
     }
 
-    public void setEntryApplicationInstanceId(int entryApplicationInstanceId) {
+    public void setEntryApplicationInstanceId(String entryApplicationInstanceId) {
         this.entryApplicationInstanceId = entryApplicationInstanceId;
     }
 

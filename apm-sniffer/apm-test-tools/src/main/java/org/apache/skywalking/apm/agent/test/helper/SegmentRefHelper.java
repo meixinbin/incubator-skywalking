@@ -19,7 +19,6 @@
 
 package org.apache.skywalking.apm.agent.test.helper;
 
-import org.apache.skywalking.apm.agent.core.context.ids.ID;
 import org.apache.skywalking.apm.agent.core.context.trace.TraceSegmentRef;
 
 public class SegmentRefHelper {
@@ -32,7 +31,7 @@ public class SegmentRefHelper {
         return null;
     }
 
-    public static ID getTraceSegmentId(TraceSegmentRef ref) {
+    public static String getTraceSegmentId(TraceSegmentRef ref) {
         try {
             return FieldGetter.getValue(ref, "traceSegmentId");
         } catch (Exception e) {
