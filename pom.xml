@@ -322,6 +322,43 @@
                     </execution>
                 </executions>
             </plugin>
+<!--
+            <plugin>
+                <groupId>com.pyx4me</groupId>
+                <artifactId>proguard-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>proguard</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <obfuscate>true</obfuscate>
+                    <proguardInclude>${basedir}/proguard.conf</proguardInclude>
+                    &lt;!&ndash; 添加依赖，这里你可以按你的需要修改 &ndash;&gt;
+                    <libs>
+                        <lib>${java.home}/lib/rt.jar</lib>
+                        <lib>lib/fcexporter_jdk1.5.jar</lib>
+                        <lib>lib/fcexporthandler.jar</lib>
+                        <lib>lib/jsp-api.jar</lib>
+                        <lib>lib/servlet-api.jar</lib>
+                    </libs>
+                    <addMavenDescriptor>false</addMavenDescriptor>
+                </configuration>
+                <dependencies>
+                    &lt;!&ndash; 使用4.8版本来混淆 &ndash;&gt;
+                    <dependency>
+                        <groupId>net.sf.proguard</groupId>
+                        <artifactId>proguard</artifactId>
+                        <version>4.8</version>
+                        <scope>runtime</scope>
+                    </dependency>
+                </dependencies>
+
+            </plugin>
+-->
         </plugins>
     </build>
 

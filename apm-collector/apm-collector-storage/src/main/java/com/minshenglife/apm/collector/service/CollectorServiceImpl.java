@@ -1,6 +1,5 @@
 package com.minshenglife.apm.collector.service;
 
-import com.alibaba.dubbo.config.annotation.DubboService;
 import com.minshenglife.apm.collector.entity.ApplicationEntity;
 import com.minshenglife.apm.collector.entity.ApplicationInstanceEntity;
 import com.minshenglife.apm.collector.entity.ApplicationInstanceHeartbeatEntity;
@@ -10,6 +9,7 @@ import com.minshenglife.apm.collector.repository.ApplicationInstanceRepository;
 import com.minshenglife.apm.collector.repository.ApplicationRepository;
 import com.minshenglife.apm.collector.repository.JVMMetricRepository;
 import com.minshenglife.guid.GuidGenerate;
+import org.apache.skywalking.apm.agent.client.api.CollectorService;
 import org.apache.skywalking.apm.agent.core.context.model.UpstreamSegment;
 import org.apache.skywalking.apm.agent.core.disk.model.DiskMetrics;
 import org.apache.skywalking.apm.agent.core.jvm.model.JVMMetric;
@@ -17,17 +17,17 @@ import org.apache.skywalking.apm.agent.core.jvm.model.JVMMetrics;
 import org.apache.skywalking.apm.agent.core.remote.model.Application;
 import org.apache.skywalking.apm.agent.core.remote.model.ApplicationInstance;
 import org.apache.skywalking.apm.agent.core.remote.model.ApplicationInstanceHeartbeat;
-import org.apache.skywalking.apm.service.ApplicationService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
  * @author meixinbin
  */
-@DubboService(version = "1.0")
-public class ApplicationServiceImpl implements ApplicationService {
+@Service
+public class CollectorServiceImpl implements CollectorService {
 
 	@Autowired
 	private ApplicationRepository applicationRepository;

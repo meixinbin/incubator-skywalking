@@ -18,6 +18,8 @@
     <modules>
         <module>apm-collector-api</module>
         <module>apm-collector-service-webapp</module>
+        <module>apm-collector-storage</module>
+        <module>apm-collector-storage-cassandra</module>
     </modules>
 
     <properties>
