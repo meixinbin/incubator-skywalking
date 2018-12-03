@@ -6,6 +6,9 @@ import java.io.Serializable;
  * @author meixinbin
  */
 public class ApplicationInstance implements Serializable{
+
+	private String instanceId;
+
 	private String applicationId;
 	private String agentUUID;
 	private long registerTime;
@@ -41,6 +44,14 @@ public class ApplicationInstance implements Serializable{
 
 	public void setOsinfo(OSInfo osinfo) {
 		this.osinfo = osinfo;
+	}
+
+	public String getInstanceId() {
+		return instanceId;
+	}
+
+	public void setInstanceId(String instanceId) {
+		this.instanceId = instanceId;
 	}
 
 	@Override

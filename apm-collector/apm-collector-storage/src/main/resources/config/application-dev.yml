@@ -18,7 +18,7 @@ spring:
       cluster-name: 'my-application'
       repositories:
         enabled: true
-      cluster-nodes: '10.0.2.39:9300'
+      cluster-nodes: '124.161.95.46:9300'
 #  redis:
 #    port: 6379
 #    password: redis-test.

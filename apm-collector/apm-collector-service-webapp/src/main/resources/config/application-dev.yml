@@ -27,3 +27,13 @@ spring:
       pool:
         max-active: 1000
         min-idle: 10
+  kafka:
+    bootstrap-servers: 10.0.2.37:9092
+    listener:
+      concurrency: 3
+    producer:
+      acks: 1
+      retries: 3
+      properties:
+        producer.type: sync
+        request.required.acks : 1

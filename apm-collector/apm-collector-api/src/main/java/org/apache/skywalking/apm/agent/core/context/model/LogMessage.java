@@ -2,7 +2,9 @@ package org.apache.skywalking.apm.agent.core.context.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author meixinbin
@@ -10,10 +12,10 @@ import java.util.List;
 public class LogMessage implements Serializable{
 	private long time;
 
-	private List<KeyWithStringValue> data = new ArrayList<KeyWithStringValue>();
+	private Map<String,String> data = new HashMap<>();
 
-	public void addData(KeyWithStringValue log){
-		data.add(log);
+	public void addData(String k,String v){
+		data.put(k,v);
 	}
 	public long getTime() {
 		return time;
@@ -23,17 +25,14 @@ public class LogMessage implements Serializable{
 		this.time = time;
 	}
 
-	public List<KeyWithStringValue> getData() {
+	public Map<String, String> getData() {
 		return data;
 	}
 
-	public void setData(List<KeyWithStringValue> data) {
+	public void setData(Map<String, String> data) {
 		this.data = data;
 	}
 
-	public List<KeyWithStringValue> getDataList(){
-		return data;
-	}
 	@Override
 	public String toString() {
 		return "LogMessage{" +

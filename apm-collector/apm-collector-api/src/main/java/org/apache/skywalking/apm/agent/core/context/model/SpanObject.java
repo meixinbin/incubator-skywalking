@@ -2,7 +2,9 @@ package org.apache.skywalking.apm.agent.core.context.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author meixinbin
@@ -22,12 +24,12 @@ public class SpanObject implements Serializable{
 	private int componentId;
 	private String component;
 	private boolean isError;
-	private List<KeyWithStringValue> tags = new ArrayList<KeyWithStringValue>();
+	private Map<String,String> tags = new HashMap<>();
 	private List<LogMessage> logs = new ArrayList<LogMessage>();
 
 
-	public void addTags(KeyWithStringValue tag){
-		tags.add(tag);
+	public void addTags(String k,String v){
+		tags.put(k,v);
 	}
 	public void addLogs(LogMessage log){
 		logs.add(log);
@@ -148,14 +150,6 @@ public class SpanObject implements Serializable{
 		isError = error;
 	}
 
-	public List<KeyWithStringValue> getTags() {
-		return tags;
-	}
-
-	public void setTags(List<KeyWithStringValue> tags) {
-		this.tags = tags;
-	}
-
 	public List<LogMessage> getLogs() {
 		return logs;
 	}
@@ -164,9 +158,14 @@ public class SpanObject implements Serializable{
 		this.logs = logs;
 	}
 
-	public KeyWithStringValue getTags(int i){
-		return tags.get(i);
+	public Map<String, String> getTags() {
+		return tags;
 	}
+
+	public void setTags(Map<String, String> tags) {
+		this.tags = tags;
+	}
+
 	public LogMessage getLogs(int i){
 		return logs.get(i);
 	}

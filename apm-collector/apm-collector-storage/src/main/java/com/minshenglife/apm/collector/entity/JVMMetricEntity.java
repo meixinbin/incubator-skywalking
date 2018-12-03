@@ -20,6 +20,7 @@ public class JVMMetricEntity {
 	@Field(store = true,index = true,analyzer = "no")
 	private String id;
 
+	@Field(store = true,index = true,analyzer = "no")
 	private String applicationInstanceId;
 
 	private long time;
